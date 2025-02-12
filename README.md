@@ -112,6 +112,8 @@ graph TD;
     APIRequests --> BackendProcess[Backend Processes Bet];
     BackendProcess --> DBUpdate[Database Logs Bet];
     DBUpdate --> SuccessMessage[Confirmation Sent to User];
+    SuccessMessage --> End([End]);
+    Error_Message --> End;
 ```
 
 #### Behavior
