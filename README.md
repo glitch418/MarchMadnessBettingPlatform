@@ -100,17 +100,17 @@ classDiagram
     Bet <|-- Game
 ```
          
-### Flowchart
+#### Flowchart
 ```mermaid
 ---
 title: Betting PLatform Program Flowchart
 ---
-graph TD;
-    Start([User Opens Website]) --> ClickBet[Clicks "Bet"];
+graph TD
+    Start([User Opens Website]) --> ClickBet[Clicks "Bet"]
     ClickBet --> APIRequest[API Request Sent to Backend]
-    APIRequest --> BackendProcess[Backend Processes Bet];
-    BackendProcess --> DBUpdate[Database Logs Bet];
-    DBUpdate --> SuccessMessage[Confirmation Sent to User];
+    APIRequest --> BackendProcess[Backend Processes Bet]
+    BackendProcess --> DBUpdate[Database Logs Bet]
+    DBUpdate --> SuccessMessage[Confirmation Sent to User]
 ```
 
 #### Behavior
