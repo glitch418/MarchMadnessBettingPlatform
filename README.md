@@ -104,7 +104,7 @@ classDiagram
 
 ```mermaid
 ---
-title: Sample Program Flowchart
+title: Program Flowchart
 ---
 graph TD;
     Start([User Opens Website]) --> ClickBet[Clicks Bet];
