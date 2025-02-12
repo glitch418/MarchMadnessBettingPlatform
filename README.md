@@ -1,233 +1,130 @@
 # Specification Document
 
-Please fill out this document to reflect your team's project. This is a living document and will need to be updated regularly. You may also remove any section to its own document (e.g. a separate standards and conventions document), however you must keep the header and provide a link to that other document under the header.
-
-Also, be sure to check out the Wiki for information on how to maintain your team's requirements.
+This document serves as a living reference for the March Madness Betting Platform. It will be updated regularly to reflect changes in project architecture, specifications, and development decisions.
 
 ## TeamName
 
-<!--The name of your team.-->
+T_23
 
 ### Project Abstract
 
-<!--A one paragraph summary of what the software will do.-->
-
-This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements.
-
-Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document. 
+The March Madness Betting Platform allows users to place bets on March Madness games through an interface. The system consists of a frontend built in React.js, a backend using a plain Java HTTP server, and a MySQL database to store betting data. Users interact with the interface to place bets, which are logged in the database for tracking. Future enhancements may include authentication, game tracking, and additional betting features.
 
 ### Customer
 
-<!--A brief description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semester to use the system.-->
+This software is designed for:
+- *Casual March Madness fans* who want to participate in friendly betting.
+- *Betting enthusiasts* looking for an easy and lightweight platform to use.
+- *Instructional staff from CS506*
 
 ### Specification
 
-<!--A detailed specification of the system. UML, or other diagrams, such as finite automata, or other appropriate specification formalisms, are encouraged over natural language.-->
-
-<!--Include sections, for example, illustrating the database architecture (with, for example, an ERD).-->
-
-<!--Included below are some sample diagrams, including some example tech stack diagrams.-->
-
 #### Technology Stack
 
-Here are some sample technology stacks that you can use for inspiration:
-
 ```mermaid
 flowchart RL
 subgraph Front End
-	A(Javascript: React)
+	A(React.js)
 end
 	
 subgraph Back End
-	B(Python: Django with \nDjango Rest Framework)
+	B(Java HTTP Server)
 end
 	
 subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|"REST API"| B
-B <-->|Django ORM| C
+A <-->|"Fetch API"| B
+B <-->|"SQL Queries"| C
 ```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Javascript: Vue)
-end
-	
-subgraph Back End
-	B(Python: Flask)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|"REST API"| B
-B <-->|SQLAlchemy| C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Javascript: Vue)
-end
-	
-subgraph Back End
-	B(Javascript: Express)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|"REST API"| B
-B <--> C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Static JS, CSS, HTML)
-end
-	
-subgraph Back End
-	B(Java: SpringBoot)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|HTTP| B
-B <--> C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Mobile App)
-end
-	
-subgraph Back End
-	B(Python: Django)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|REST API| B
-B <-->|Django ORM| C
-```
-
-
 
 #### Database
 
 ```mermaid
 ---
-title: Sample Database ERD for an Order System
+title: Database for Betting Platform
 ---
 erDiagram
-    Customer ||--o{ Order : "placed by"
-    Order ||--o{ OrderItem : "contains"
-    Product ||--o{ OrderItem : "included in"
+    User ||--o{ Bet : "places"
+    Bet ||--o{ Game : "on"
 
-    Customer {
-        int customer_id PK
-        string name
+    User {
+        int user_id PK
+        string username
         string email
-        string phone
     }
 
-    Order {
-        int order_id PK
-        int customer_id FK
-        string order_date
-        string status
+    Bet {
+        int bet_id PK
+        int user_id FK
+        decimal amount
+        string bet_type
     }
 
-    Product {
-        int product_id PK
-        string name
-        string description
-        decimal price
-    }
-
-    OrderItem {
-        int order_item_id PK
-        int order_id FK
-        int product_id FK
-        int quantity
+    Game {
+        int game_id PK
+        string team_one
+        string team_two
+        date game_date
     }
 ```
 
 #### Class Diagram
-
 ```mermaid
 ---
-title: Sample Class Diagram for Animal Program
+title: Class Diagram for Betting Platform
 ---
 classDiagram
-    class Animal {
-        - String name
-        + Animal(String name)
-        + void setName(String name)
-        + String getName()
-        + void makeSound()
+
+    class User {
+        - int user_id
+        - string username
+        - string email
     }
-    class Dog {
-        + Dog(String name)
-        + void makeSound()
+
+    class Bet {
+        - int bet_id
+        - int user_id
+        - decimal amount
+        - string bet_type
     }
-    class Cat {
-        + Cat(String name)
-        + void makeSound()
+
+    class Game {
+        - int game_id
+        - string team_one
+        - string team_two
+        - date game_date
     }
-    class Bird {
-        + Bird(String name)
-        + void makeSound()
-    }
-    Animal <|-- Dog
-    Animal <|-- Cat
-    Animal <|-- Bird
+    User <|-- Bet
+    Bet <|-- Game
 ```
 
 #### Flowchart
 
 ```mermaid
 ---
-title: Sample Program Flowchart
+title: Program Flowchart
 ---
 graph TD;
-    Start([Start]) --> Input_Data[/Input Data/];
-    Input_Data --> Process_Data[Process Data];
-    Process_Data --> Validate_Data{Validate Data};
-    Validate_Data -->|Valid| Process_Valid_Data[Process Valid Data];
-    Validate_Data -->|Invalid| Error_Message[/Error Message/];
-    Process_Valid_Data --> Analyze_Data[Analyze Data];
-    Analyze_Data --> Generate_Output[Generate Output];
-    Generate_Output --> Display_Output[/Display Output/];
-    Display_Output --> End([End]);
-    Error_Message --> End;
+    Start([User Opens Website]) --> ClickBet[Clicks Bet];
+    ClickBet --> APIRequest[API Request Sent to Backend];
+    APIRequests --> BackendProcess[Backend Processes Bet];
+    BackendProcess --> DBUpdate[Database Logs Bet];
+    DBUpdate --> SuccessMessage[Confirmation Sent to User];
 ```
 
 #### Behavior
 
 ```mermaid
 ---
-title: Sample State Diagram For Coffee Application
+title: State Diagram For Betting Application
 ---
 stateDiagram
     [*] --> Ready
-    Ready --> Brewing : Start Brewing
-    Brewing --> Ready : Brew Complete
-    Brewing --> WaterLowError : Water Low
-    WaterLowError --> Ready : Refill Water
-    Brewing --> BeansLowError : Beans Low
-    BeansLowError --> Ready : Refill Beans
+    Ready --> PlacingBet : User Clicks "Bet"
+    PlacingBet --> Processing : Backend Logs Bet
+    Processing --> Completed : Confirmation Sent
 ```
 
 #### Sequence Diagram
@@ -236,20 +133,16 @@ stateDiagram
 sequenceDiagram
 
 participant ReactFrontend
-participant DjangoBackend
+participant JavaBackend
 participant MySQLDatabase
 
-ReactFrontend ->> DjangoBackend: HTTP Request (e.g., GET /api/data)
-activate DjangoBackend
+ReactFrontend ->> JavaBackend: HTTP POST /bet
 
-DjangoBackend ->> MySQLDatabase: Query (e.g., SELECT * FROM data_table)
-activate MySQLDatabase
+JavaBackend ->> MySQLDatabase: INSERT INTO bets
 
-MySQLDatabase -->> DjangoBackend: Result Set
-deactivate MySQLDatabase
+MySQLDatabase -->> JavaBackend: Success
 
-DjangoBackend -->> ReactFrontend: JSON Response
-deactivate DjangoBackend
+JavaBackend -->> ReactFrontend:"Bet placed successfully!"
 ```
 
 ### Standards & Conventions
