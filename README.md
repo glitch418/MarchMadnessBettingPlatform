@@ -107,13 +107,11 @@ classDiagram
 title: Sample Program Flowchart
 ---
 graph TD;
-    Start([User Opens Website]) --> ClickBet[Clicks "Bet"];
+    Start([User Opens Website]) --> ClickBet[Clicks Bet];
     ClickBet --> APIRequest[API Request Sent to Backend];
     APIRequests --> BackendProcess[Backend Processes Bet];
     BackendProcess --> DBUpdate[Database Logs Bet];
     DBUpdate --> SuccessMessage[Confirmation Sent to User];
-    SuccessMessage --> End([End]);
-    Error_Message --> End;
 ```
 
 #### Behavior
