@@ -3,7 +3,7 @@ This document is a style guide which contains styling conventions to be followed
 
 ## Line length
 Recommended limit of line length:  
-#### 80 characters including whitespace.
+**80 characters including whitespace**
 
 
 ## Braces {}
@@ -18,15 +18,15 @@ statement header {
 ## Whitespace
 Use horizontal whitespace to organize each line of code into meaningful parts. 
 
-#### good style	```result = 5 * abs(xCoord - ++yCoord) / (11 % -time)```  
-bad style	```result=5*abs(xCoord-++yCoord)/(11%-time)```
+**good style	```result = 5 * abs(xCoord - ++yCoord) / (11 % -time)```**  
+**bad style	```result=5*abs(xCoord-++yCoord)/(11%-time)```**
 
-#### good style	```for (day = 11; day < 22 && !done; ++day) {```  
-bad style	```for(day=11;day<2&&!done;++day){```
+**good style	```for (day = 11; day < 22 && !done; ++day) {```**  
+**bad style	```for(day=11;day<2&&!done;++day){```**
 
 
 ## Indentation
-Use 4 spaces to indicate each level of nesting.
+Use **4 spaces** to indicate each level of nesting.
 
 #### if & for loop
 ```
@@ -76,10 +76,10 @@ CONSTANTS are in all uppercase letters. MULTI_WORD_CONSTANTS use an underscore t
 Use descriptive names. It must relate to the intended use. 
 Short (i.e. 1 letter) names can be used for temporary variables and loop counters.
 
-#### tableHeight is more descriptive than th.
+**tableHeight is more descriptive than th**
 
 
 ## Use Symbolic Constants instead of magic numbers
 Define symbolic constants to avoid the need to use literal values.  
-#### Use PI instead of 3.1415927 in calculations or comparisons.
+**Use PI instead of 3.1415927 in calculations or comparisons**
 
