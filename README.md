@@ -8,7 +8,7 @@ T_23
 
 ### Project Abstract
 
-The March Madness Betting Platform allows users to place bets on March Madness games through an interface. The system consists of a frontend built in React.js, a backend using a plain Java HTTP server, and a MySQL database to store betting data. Users interact with the interface to place bets, which are logged in the database for tracking. Future enhancements may include authentication, game tracking, and additional betting features.
+The March Madness Betting Platform allows users to place bets on March Madness games through an interface. The system consists of a frontend built in React.js, a backend using a plain Java HTTP server, and a MySQL database to store betting data. Users interact with the interface to place bets, which are logged in the database for tracking. Future enhancements includes authentication, game tracking, and additional betting features.
 
 ### Customer
 
