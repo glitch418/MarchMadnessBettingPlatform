@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: march_madness_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: betting_platform
+      MYSQL_USER: betting_user
+      MYSQL_PASSWORD: betting_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/setup.sql:/docker-entrypoint-initdb.d/setup.sql  # Auto-run SQL on startup
+
+volumes:
+  db_data:
