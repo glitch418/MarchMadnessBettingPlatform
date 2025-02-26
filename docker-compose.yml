@@ -13,6 +13,16 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./database/setup.sql:/docker-entrypoint-initdb.d/setup.sql  # Auto-run SQL on startup
-
+  phpmyadmin2:
+      image: phpmyadmin/phpmyadmin:latest
+      restart: always
+      depends_on:
+        - mysql
+      environment:
+        PMA_HOST: db2
+        PMA_USER: root
+        PMA_PASSWORD: rootpassword
+      ports:
+        - "50082:80"
 volumes:
   db_data:
