@@ -47,7 +47,7 @@ public class BackendMain {
         return scan.nextLine();
     }
 
-    // New method: starts a TCP server for frontend communication
+    // starts a TCP server for frontend communication
     public static void startTCPServer() {
         int port = 5000;
 
