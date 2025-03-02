@@ -64,7 +64,7 @@ public class BackendMain {
         }
     }
 
-    // 🆕 New method: handles incoming frontend requests
+    // New method: handles incoming frontend requests
     public static void handleClient(Socket socket) {
         try (
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
