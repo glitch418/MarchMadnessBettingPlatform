@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
-import Game from './components/Game/Game';
+import MyBets from './Pages/MyBets/MyBets';
 
 // Import the backend query function
 import { queryBackend } from './utils/socket';
@@ -31,16 +31,30 @@ const App = () => {
   return (
     <>
       {/* Original Routing Code (Untouched) */}
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          {/* TODO: Sign up page */}
-          {/* TODO: Protect routes based on login status */}
+
+      <Router> {/* Provides routing context */}
+        <Routes> {/* Container that matches routes */}
+          {/* Individual route definitions */}
+
+          {/* Default path directs user to home page */}
           <Route path="/" element={<Home />} />
-          <Route path="*" element={<Login />} />
+
+          {/* Login Page */}
+          <Route path="/login" element={<Login/>} />
+          {/* TODO: Sign up page */}
+          {/* <Route path="/signup" element={<SignUp/>} /> */}
+          {/* TODO: Profile page */}
+          {/* <Route path="/profile" element={<Profile/>} /> */}
+
+          {/* MyBets Page */}
+          <Route path="/myBets" element={<MyBets/>} />
+
+          {/* Any undefined paths redirect to Home */}
+          <Route path="*" element={<Home/>} />
         </Routes>
       </Router>
 
+      {/* TOD0: shift this safely to a new file to make it reusable */}
       {/* New Feature: Custom Query Input and Results */}
       <div style={{ padding: '20px', backgroundColor: '#f9f9f9', marginTop: '20px' }}>
         <h2>Test Custom Backend Query</h2>
