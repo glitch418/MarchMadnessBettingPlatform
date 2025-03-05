@@ -18,21 +18,19 @@ public class BackendMain {
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
 
             String testQuery = receiveQuery();
-            ResultSet rs;
             System.out.println("Executing query: " + testQuery);
-            if(testQuery.toLowerCase().contains("select")) {
-                rs = exeSelect(testQuery);
-                while (rs.next()) {
-                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                        if (i > 1) System.out.print(",  ");
-                        String columnValue = rsBets.getString(i);
-                        System.out.print(columnValue + " " + rsMeta.getColumnName(i));
-                    }
-                    System.out.println();
+
+            Statement selectFromBets = dbCxn.createStatement();
+            ResultSet rsBets = selectFromBets.executeQuery(testQuery);
+            ResultSetMetaData rsMeta = rsBets.getMetaData();
+
+            while (rsBets.next()) {
+                for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+                    if (i > 1) System.out.print(",  ");
+                    String columnValue = rsBets.getString(i);
+                    System.out.print(columnValue + " " + rsMeta.getColumnName(i));
                 }
-            }
-            else if(testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
-                exeUpdate(testQuery);
+                System.out.println();
             }
 
             dbCxn.close();
@@ -47,31 +45,6 @@ public class BackendMain {
         Scanner scan = new Scanner(System.in);
         System.out.println("What would you like to query: ");
         return scan.nextLine();
-    }
-
-    public static ResultSet exeSelect(String query, Connection dbCxn) {
-        try {
-
-            Statement selectFrom = dbCxn.createStatement();
-            ResultSet rsSelect = selectFrom.executeQuery(query);
-
-            return rsSelect;
-
-        } catch (Exception e) {
-            System.out.println("Command-line Query Error: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public static void exeUpdate(String query, Connection dbCxn) {
-        try {
-
-            Statement update = dbCxn.createStatement();
-            update.executeUpdate(query);
-
-        } catch (Exception e) {
-            System.out.println("Command-line Query Error: " + e.getMessage());
-        }
     }
 
     // starts a TCP server for frontend communication
