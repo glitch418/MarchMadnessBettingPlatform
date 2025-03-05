@@ -21,11 +21,12 @@ public class BackendMain {
             System.out.println("Executing query: " + testQuery);
 
             if(testQuery.toLowerCase().contains("select")) {
-                rs = exeSelect(testQuery, dbCxn);
+                ResultSet rs = exeSelect(testQuery, dbCxn);
                 while (rs.next()) {
+                    ResultSetMetaData rsMeta = rs.getMetaData();
                     for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
                         if (i > 1) System.out.print(",  ");
-                        String columnValue = rsBets.getString(i);
+                        String columnValue = rs.getString(i);
                         System.out.print(columnValue + " " + rsMeta.getColumnName(i));
                     }
                     System.out.println();
@@ -42,12 +43,12 @@ public class BackendMain {
         }
     }
 
-    public static ResultSet exeSelect(String query, Connection dbCxn) {
+    public static ResultSet exeSelect(String query, Connection dbCxn) throws SQLException {
         Statement stmt = dbCxn.createStatement();
         return stmt.executeQuery(query);
     }
 
-    public static void exeUpdate(String query, Connection dbCxn) {
+    public static void exeUpdate(String query, Connection dbCxn) throws SQLException {
         Statement stmt = dbCxn.createStatement();
         stmt.executeUpdate(query);
     }
