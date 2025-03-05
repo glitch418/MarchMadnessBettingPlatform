@@ -20,17 +20,19 @@ public class BackendMain {
             String testQuery = receiveQuery();
             System.out.println("Executing query: " + testQuery);
 
-            Statement selectFromBets = dbCxn.createStatement();
-            ResultSet rsBets = selectFromBets.executeQuery(testQuery);
-            ResultSetMetaData rsMeta = rsBets.getMetaData();
-
-            while (rsBets.next()) {
-                for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                    if (i > 1) System.out.print(",  ");
-                    String columnValue = rsBets.getString(i);
-                    System.out.print(columnValue + " " + rsMeta.getColumnName(i));
+            if(testQuery.toLowerCase().contains("select")) {
+                rs = exeSelect(testQuery, dbCxn);
+                while (rs.next()) {
+                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+                        if (i > 1) System.out.print(",  ");
+                        String columnValue = rsBets.getString(i);
+                        System.out.print(columnValue + " " + rsMeta.getColumnName(i));
+                    }
+                    System.out.println();
                 }
-                System.out.println();
+            }
+            else if(testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
+                exeUpdate(testQuery, dbCxn);
             }
 
             dbCxn.close();
@@ -38,6 +40,16 @@ public class BackendMain {
         } catch (Exception e) {
             System.out.println("Command-line Query Error: " + e.getMessage());
         }
+    }
+
+    public static ResultSet exeSelect(String query, Connection dbCxn) {
+        Statement stmt = dbCxn.createStatement();
+        return stmt.executeQuery(query);
+    }
+
+    public static void exeUpdate(String query, Connection dbCxn) {
+        Statement stmt = dbCxn.createStatement();
+        stmt.executeUpdate(query);
     }
 
     // Existing method: receives query from command line
