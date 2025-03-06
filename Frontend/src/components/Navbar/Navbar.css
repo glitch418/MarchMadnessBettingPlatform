@@ -1,0 +1,62 @@
+nav {
+    /* Navbar Color */
+    background-color: black;
+    /* Padding helps to increase/decrease size too */
+    padding: 10px 20px;
+    /* Contents placed in row (horizontally) */
+    display: flex;
+    align-items: center;
+    /* Navbar is unscrollable */
+    position: fixed;
+    /* Position is top left */
+    top: 0;
+    left: 0;
+    /* Full Width */
+    width: 100%;
+    /* Occupy small space of screen vertically */
+    height: 60px;
+    /* Appear above all other elements */
+    z-index: 1000;
+    /* Gap between elements */
+    gap: 175px;
+  }
+
+/* Main container */
+.container {
+    display: flex;
+    gap: 20px;
+}
+
+/* Flexbox to align icon and text */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+}
+
+/* Search bar */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#search-bar {
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    width: 700px;
+}
+
+/*  To find hexcode of corresponding colors, visit: https://htmlcolorcodes.com/colors/
+    Current hexcode used: Orange = #FFAC1C / Blue = #09BDF2
+    To convert hexcode to filter, visit: https://codepen.io/sosuke/pen/Pjoqqp
+*/
+#home-icon, #bet-icon, #search-icon {
+    filter: invert(61%) sepia(84%) saturate(436%) hue-rotate(355deg) brightness(99%) contrast(104%);
+    /* filter: invert(69%) sepia(37%) saturate(5288%) hue-rotate(153deg) brightness(97%) contrast(96%); */
+}
