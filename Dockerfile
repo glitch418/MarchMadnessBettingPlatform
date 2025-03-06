@@ -2,14 +2,14 @@ FROM openjdk:17
 
 WORKDIR /app
 
-# Copy the backend Java file into the container
+# Copy Java files into the container
 COPY BackendMain.java .
 
-# Compile the Java application
-RUN javac BackendMain.java
+# Install Spark Java (needed for HTTP support)
+RUN javac -cp ".:spark-core-2.9.3.jar" BackendMain.java
 
-# Expose the port for frontend-backend communication
+# Expose HTTP port
 EXPOSE 5000
 
-# Run the compiled Java application
-CMD ["java", "BackendMain"]
+# Run Backend
+CMD ["java", "-cp", ".:spark-core-2.9.3.jar", "BackendMain"]

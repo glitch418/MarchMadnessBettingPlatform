@@ -30,7 +30,7 @@ services:
     build:
       context: .  # Points to the project root where BackendMain.java is located
     ports:
-      - "5000:5000"  # Port for TCP communication with the frontend
+      - "5000:5000"  # Expose HTTP port for frontend communication
     depends_on:
       - db
     networks:
@@ -40,7 +40,7 @@ services:
     build:
       context: ./Frontend
     ports:
-      - "3000:80"  # Map port 80 in the container to localhost:3000
+      - "3000:80"  # Serve frontend at http://localhost:3000
     depends_on:
       - backend
     networks:
