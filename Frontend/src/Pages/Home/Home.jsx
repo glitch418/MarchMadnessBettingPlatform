@@ -1,12 +1,15 @@
 import React from "react";
 import "./Home.css";
 import Navbar from "../../components/Navbar/Navbar";
+import Query from "../../utils/Query";
 
 const Home = () => {
     return (
-     <div>
+     <div className="home-container" style = {{backgroundColor: 'hsl(0, 0%, 27%)'}}>
          <Navbar/>
-         <p>This is Home</p>
+         <div style={{paddingTop: '60px'}}>
+            {/* ENABLE/DISABLE query box by commenting out: <Query/> */}
+        </div>
      </div>
     )
   }
