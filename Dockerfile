@@ -15,6 +15,7 @@ COPY 2024_game_results/march_madness_mens_games_2024.csv /app/march_madness_mens
 # Compile the Java application
 RUN javac -d /app BackendMain.java
 RUN javac -d /app /app/database/InsertTeams.java  
+RUN javac -d /app /app/database/InsertGames.java
 
 # Expose the port for frontend-backend communication
 EXPOSE 5000
