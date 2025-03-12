@@ -1,15 +1,17 @@
-FROM openjdk:17
-
+FROM openjdk:17-slim
 WORKDIR /app
 
-# Copy Java files into the container
+# Copy Java source code
 COPY BackendMain.java .
 
-# Install Spark Java (needed for HTTP support)
-RUN javac -cp ".:spark-core-2.9.3.jar" BackendMain.java
+# Install required dependencies
+RUN apt-get update && apt-get install -y wget curl
 
-# Expose HTTP port
-EXPOSE 5000
+# Download MySQL Connector
+RUN wget -O mysql-connector-java-8.3.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.3.0/mysql-connector-j-8.3.0.jar
 
-# Run Backend
-CMD ["java", "-cp", ".:spark-core-2.9.3.jar", "BackendMain"]
+# Compile Java program
+RUN javac -cp ".:mysql-connector-java-8.3.0.jar" BackendMain.java
+
+# Run backend server
+CMD ["java", "-cp", ".:mysql-connector-java-8.3.0.jar", "BackendMain"]

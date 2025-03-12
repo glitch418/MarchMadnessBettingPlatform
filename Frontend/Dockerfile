@@ -1,26 +1,27 @@
-# Use Node.js to build the app
+# Use an official Node.js image to build the app
 FROM node:18 AS build
 
+# Set working directory
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the frontend code
+# Copy the rest of the application code
 COPY . .
 
-# Build the React app
+# Build the production-ready React app
 RUN npm run build
 
-# Use Nginx to serve the frontend
+# Use a lightweight web server to serve the build
 FROM nginx:alpine
 
-# Copy the built React app to Nginx's serving directory
+# Copy the build files from the previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 for serving the frontend
+# Expose port 80 to serve the frontend
 EXPOSE 80
 
-# Start Nginx
+# Start the Nginx server
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,10 +1,14 @@
-import static spark.Spark.*;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.sql.*;
 import java.util.Scanner;
 
 public class BackendMain {
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Start HTTP server for frontend communication
         startHttpServer();
 
@@ -12,16 +16,38 @@ public class BackendMain {
         runCommandLineQuery();
     }
 
-    //  HTTP server for frontend communication
-    public static void startHttpServer() {
-        port(5000); // Set backend port
-
-        get("/query", (req, res) -> {
-            String query = req.queryParams("q"); // Get query from frontend
-            return executeQuery(query);
-        });
-
+    public static void startHttpServer() throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(5000), 0);
+        server.createContext("/query", new QueryHandler());
+        server.setExecutor(null);
+        server.start();
         System.out.println("HTTP server running on port 5000");
+    }
+
+    static class QueryHandler implements HttpHandler {
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight requests
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                String response = executeQuery(query);
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            }
+        }
     }
 
     // Philip's Database Connection
@@ -33,7 +59,7 @@ public class BackendMain {
             String testQuery = receiveQuery();
             System.out.println("Executing query: " + testQuery);
 
-            if(testQuery.toLowerCase().contains("select")) {
+            if (testQuery.toLowerCase().contains("select")) {
                 ResultSet rs = exeSelect(testQuery, dbCxn);
                 while (rs.next()) {
                     ResultSetMetaData rsMeta = rs.getMetaData();
@@ -44,8 +70,7 @@ public class BackendMain {
                     }
                     System.out.println();
                 }
-            }
-            else if(testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
+            } else if (testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
                 exeUpdate(testQuery, dbCxn);
             }
 
@@ -75,7 +100,6 @@ public class BackendMain {
     //  HTTP API-compatible query execution
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
-
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
