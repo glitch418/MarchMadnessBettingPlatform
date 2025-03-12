@@ -77,6 +77,18 @@ public class BackendMain {
         }
     }
 
+    public boolean try_login(String email, String password, Connection dbCxn) throws SQLException{
+        Statement stmt = dbCxn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'");
+        return rs.next();
+    }
+
+    public boolean create_user(String username, String email, String password, Connection dbCxn) throws SQLException{
+        Statement stmt = dbCxn.createStatement();
+        stmt.executeUpdate("INSERT INTO users (username, email, password_hash) VALUES ('" + "'" + username + "'," + email + "', '" + password + "')");
+        return true;
+    }
+
     // New method: handles incoming frontend requests
     public static void handleClient(Socket socket) {
         try (
