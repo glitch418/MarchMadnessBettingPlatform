@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
-import SignUp from './Pages/SignUp/SignUp';
 import MyBets from './Pages/MyBets/MyBets';
 
 const App = () => {
@@ -17,7 +16,7 @@ const App = () => {
           {/* Login Page */}
           <Route path="/login" element={<Login/>} />
           {/* Sign up page */}
-          <Route path="/signup" element={<SignUp/>} />
+          {/* <Route path="/signup" element={<SignUp/>} /> */}
 
           {/* TODO: Profile page */}
           {/* <Route path="/profile" element={<Profile/>} /> */}
