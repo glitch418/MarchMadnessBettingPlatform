@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // Import the backend query function using HTTP
-import { queryBackend } from './utils/api';
+import { queryBackend } from "./api.js";
 
 const Query = () => {
   // State for handling query input and results
