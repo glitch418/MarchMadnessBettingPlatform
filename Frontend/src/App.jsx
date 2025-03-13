@@ -4,15 +4,15 @@ import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import MyBets from './Pages/MyBets/MyBets';
 
-// Import the backend query function
-import { queryBackend } from './utils/socket';
+// Import the backend query function using HTTP
+import { queryBackend } from './utils/api';
 
 const App = () => {
   // State for handling query input and results
   const [queryInput, setQueryInput] = useState('');
   const [queryResult, setQueryResult] = useState('');
 
-  // Function to handle backend query
+  // Function to handle backend query using HTTP
   const handleQuery = async () => {
     if (!queryInput.trim()) {
       alert('Please enter a valid query.');
@@ -20,7 +20,7 @@ const App = () => {
     }
 
     try {
-      const result = await queryBackend(queryInput); // Send custom query
+      const result = await queryBackend(queryInput); // Send custom query via HTTP
       setQueryResult(result); // Display results
     } catch (error) {
       console.error('Query failed:', error);
@@ -31,30 +31,15 @@ const App = () => {
   return (
     <>
       {/* Original Routing Code (Untouched) */}
-
-      <Router> {/* Provides routing context */}
-        <Routes> {/* Container that matches routes */}
-          {/* Individual route definitions */}
-
-          {/* Default path directs user to home page */}
+      <Router>
+        <Routes>
           <Route path="/" element={<Home />} />
-
-          {/* Login Page */}
-          <Route path="/login" element={<Login/>} />
-          {/* TODO: Sign up page */}
-          {/* <Route path="/signup" element={<SignUp/>} /> */}
-          {/* TODO: Profile page */}
-          {/* <Route path="/profile" element={<Profile/>} /> */}
-
-          {/* MyBets Page */}
-          <Route path="/myBets" element={<MyBets/>} />
-
-          {/* Any undefined paths redirect to Home */}
-          <Route path="*" element={<Home/>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/myBets" element={<MyBets />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </Router>
 
-      {/* TOD0: shift this safely to a new file to make it reusable */}
       {/* New Feature: Custom Query Input and Results */}
       <div style={{ padding: '20px', backgroundColor: '#f9f9f9', marginTop: '20px' }}>
         <h2>Test Custom Backend Query</h2>

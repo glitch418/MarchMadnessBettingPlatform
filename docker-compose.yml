@@ -28,9 +28,10 @@ services:
 
   backend:
     build:
-      context: .  # Points to the project root where BackendMain.java is located
+      context: .  # BackendMain.java is in the root directory
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"  # Port for TCP communication with the frontend
+      - "5000:5000"  # Port for HTTP communication with the frontend
     depends_on:
       - db
     networks:
@@ -39,6 +40,7 @@ services:
   frontend:
     build:
       context: ./Frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:80"  # Map port 80 in the container to localhost:3000
     depends_on:
