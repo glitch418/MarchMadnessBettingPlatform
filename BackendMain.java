@@ -100,12 +100,14 @@ public class BackendMain {
     //  HTTP API-compatible query execution
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
+        String db = "not set";
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
              ) {
                 ResultSet rs = null;
                 if (query.toLowerCase().contains("select")) {
+                    db = "select";
                     rs = stmt.executeQuery(query);
                     while (rs.next()) {
                         ResultSetMetaData rsMeta = rs.getMetaData();
@@ -117,6 +119,7 @@ public class BackendMain {
                         System.out.println();
                     }
                 } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
+                    db = "update " + query;
                     stmt.executeUpdate(query);
                 }
             if(rs != null) {
@@ -131,11 +134,11 @@ public class BackendMain {
             
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return "SQL Error: " + e.getMessage();
+            return "SQL Error: " + db + " " + e.getMessage();
             
         }
         catch (Exception e) {
-            return "Other Error: " + e.getMessage();
+            return "Other Error: " + db + " " + e.getMessage();
         }
         return result.toString();
     }
