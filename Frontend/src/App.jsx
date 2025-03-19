@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import MyBets from './Pages/MyBets/MyBets';
-
-// Import the backend query function using HTTP
-import { queryBackend } from './utils/api';
 
 const App = () => {
   // State for handling query input and results
@@ -33,37 +30,28 @@ const App = () => {
   };
 
   return (
-    <>
-      {/* Original Routing Code (Untouched) */}
-      <Router>
-        <Routes>
+      <Router> {/* Provides routing context */}
+        <Routes> {/* Container that matches routes */}
+          {/* Individual route definitions */}
+
+          {/* Default path directs user to home page */}
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/myBets" element={<MyBets />} />
-          <Route path="*" element={<Home />} />
+
+          {/* Login Page */}
+          <Route path="/login" element={<Login/>} />
+          {/* Sign up page */}
+          {/* <Route path="/signup" element={<SignUp/>} /> */}
+
+          {/* TODO: Profile page */}
+          {/* <Route path="/profile" element={<Profile/>} /> */}
+
+          {/* MyBets Page */}
+          <Route path="/myBets" element={<MyBets/>} />
+
+          {/* Any undefined paths redirect to Home */}
+          <Route path="*" element={<Home/>} />
         </Routes>
       </Router>
-
-      {/* New Feature: Custom Query Input and Results */}
-      <div style={{ padding: '20px', backgroundColor: '#f9f9f9', marginTop: '20px' }}>
-        <h2>Test Custom Backend Query</h2>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-          <input
-            type="text"
-            placeholder="Enter SQL query (e.g., SELECT * FROM bets)"
-            value={queryInput}
-            onChange={(e) => setQueryInput(e.target.value)}
-            style={{ flex: 1, padding: '8px' }}
-          />
-          <button onClick={handleQuery} style={{ padding: '8px 16px' }}>
-            Run Query
-          </button>
-        </div>
-        <pre style={{ backgroundColor: '#eaeaea', padding: '10px', minHeight: '100px' }}>
-          {queryResult || 'No query run yet.'}
-        </pre>
-      </div>
-    </>
   );
 };
 
