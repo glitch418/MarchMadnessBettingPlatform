@@ -14,15 +14,19 @@ const App = () => {
 
   // Function to handle backend query using HTTP
   const handleQuery = async () => {
+    console.log("running...");
     if (!queryInput.trim()) {
       alert('Please enter a valid query.');
       return;
     }
 
     try {
+      console.log("running...");
       const result = await queryBackend(queryInput); // Send custom query via HTTP
+      console.log(result);
       setQueryResult(result); // Display results
     } catch (error) {
+      console.log(result);
       console.error('Query failed:', error);
       setQueryResult('Error executing query.');
     }

@@ -105,9 +105,10 @@ public class BackendMain {
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
              ) {
-                ResultSet rs = null;
+                ResultSet rs;
                 if (query.toLowerCase().contains("select")) {
                     db = "select";
+                    query = query.substring(2);
                     rs = stmt.executeQuery(query);
                     while (rs.next()) {
                         ResultSetMetaData rsMeta = rs.getMetaData();
@@ -119,8 +120,13 @@ public class BackendMain {
                         System.out.println();
                     }
                 } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
+                    query = query.substring(2);
+                    rs = null;
                     db = "update " + query;
                     stmt.executeUpdate(query);
+                }
+                else {
+                    rs = null;
                 }
             if(rs != null) {
                 ResultSetMetaData metaData = rs.getMetaData();
@@ -134,7 +140,7 @@ public class BackendMain {
             
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return "SQL Error: " + db + " " + e.getMessage();
+            return "SQL Error: " + query + " " + e.getMessage();
             
         }
         catch (Exception e) {
