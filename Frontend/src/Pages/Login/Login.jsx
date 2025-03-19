@@ -18,7 +18,7 @@ const Login = () => {
         e.preventDefault();
         
         //TODO: check credentials
-        if (true){
+        if (handleLogin()){
             navigate("/");
         }
     }
@@ -35,7 +35,8 @@ const Login = () => {
           console.log("running...");
             const result = await queryBackend(query); // Send custom query via HTTP
             console.log(result);
-            setQueryResult(result); // Display results
+            setQueryResult(result); 
+            return result;// Display results
         } catch (error) {
           console.error('Query failed:', error);
           setQueryResult('Error executing query.');
@@ -44,6 +45,11 @@ const Login = () => {
 
       function handleCreateAccount() {
         let x = ("INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')");
+        handleQuery(x);
+      }
+
+      function handleLogin() {
+        let x = ("SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'");
         handleQuery(x);
       }
 
