@@ -10,6 +10,7 @@ COPY database/ /app/database/
 COPY database/mysql-connector-j-9.2.0.jar /app/lib/
 
 COPY 2024_game_results/march_madness_mens_games_2024.csv /app/march_madness_mens_games_2024.csv 
+COPY 2024_game_results/teams_mapping.csv /app/teams_mapping.csv
 
 # Install required dependencies
 RUN apt-get update && apt-get install -y wget curl
