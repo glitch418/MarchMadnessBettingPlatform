@@ -24,16 +24,16 @@ const Login = () => {
     }
 
     // Function to handle backend query using HTTP
-      const handleQuery = async () => {
+      const handleQuery = async (query) => {
         console.log("running...");
-        if (!queryInput.trim()) {
+        if (!query.trim()) {
           alert('Please enter a valid query.');
           return;
         }
         
         try {
           console.log("running...");
-            const result = await queryBackend(queryInput); // Send custom query via HTTP
+            const result = await queryBackend(query); // Send custom query via HTTP
             console.log(result);
             setQueryResult(result); // Display results
         } catch (error) {
@@ -42,23 +42,23 @@ const Login = () => {
         }
       };
 
-      function handleCreateAccount(){
-        //console.log("try to create account");
-        return "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "1', '" + password + "')";
+      function handleCreateAccount() {
+        let x = ("INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')");
+        handleQuery(x);
       }
 
     return (
         <div>
             {/*TODO: update handle submit */}
             <form onSubmit={handleSubmit}>
-                <input placeholder="example@email.com" onChange={(e) => {setEmail(e.target.value); setQueryInput(handleCreateAccount())}}/>
-                <input type={showPassword ? "text" : "password"} placeholder="password" onChange={(e) => {setPassword(e.target.value); setQueryInput(handleCreateAccount());}}/>
+                <input placeholder="example@email.com" onChange={(e) => {setEmail(e.target.value);}}/>
+                <input type={showPassword ? "text" : "password"} placeholder="password" onChange={(e) => {setPassword(e.target.value);}}/>
                 <div><input onChange={() => setShowPassword(!showPassword)} type="checkbox"/> <p> Show Password</p></div>  
                 <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
             </form>
 
             {/*TODO: handle create account */}
-            <button onClick={handleQuery} type="button">Create Account</button>
+            <button onClick={handleCreateAccount} type="button">Create Account</button>
 
             {/*TODO: handle forgot password */}
             <button type="button" onClick={() => (console.log(queryInput))}>Forgot Password?</button>
