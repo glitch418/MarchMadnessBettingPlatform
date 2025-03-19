@@ -17,7 +17,7 @@ public class BackendMain {
     }
 
     public static void startHttpServer() throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(5000), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
         server.createContext("/query", new QueryHandler());
         server.setExecutor(null);
         server.start();
@@ -103,17 +103,39 @@ public class BackendMain {
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            ResultSetMetaData metaData = rs.getMetaData();
-            while (rs.next()) {
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    result.append(rs.getString(i)).append(" ");
+             ) {
+                ResultSet rs = null;
+                if (query.toLowerCase().contains("select")) {
+                    rs = stmt.executeQuery(query);
+                    while (rs.next()) {
+                        ResultSetMetaData rsMeta = rs.getMetaData();
+                        for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+                            if (i > 1) System.out.print(",  ");
+                            String columnValue = rs.getString(i);
+                            System.out.print(columnValue + " " + rsMeta.getColumnName(i));
+                        }
+                        System.out.println();
+                    }
+                } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
+                    stmt.executeUpdate(query);
                 }
-                result.append("\n");
+            if(rs != null) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                while (rs.next()) {
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        result.append(rs.getString(i)).append(" ");
+                    }
+                    result.append("\n");
+                }
             }
+            
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return "SQL Error: " + e.getMessage();
+            
+        }
+        catch (Exception e) {
+            return "Other Error: " + e.getMessage();
         }
         return result.toString();
     }
