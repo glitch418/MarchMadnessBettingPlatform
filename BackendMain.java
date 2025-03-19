@@ -104,21 +104,14 @@ public class BackendMain {
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
+             
              ) {
-                ResultSet rs;
+                ResultSet rs = null;
                 if (query.toLowerCase().contains("select")) {
                     db = "select";
                     query = query.substring(2);
                     rs = stmt.executeQuery(query);
-                    while (rs.next()) {
-                        ResultSetMetaData rsMeta = rs.getMetaData();
-                        for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                            if (i > 1) System.out.print(",  ");
-                            String columnValue = rs.getString(i);
-                            System.out.print(columnValue + " " + rsMeta.getColumnName(i));
-                        }
-                        System.out.println();
-                    }
+                    
                 } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
                     query = query.substring(2);
                     rs = null;
@@ -137,6 +130,7 @@ public class BackendMain {
                     result.append("\n");
                 }
             }
+            return result.toString();
             
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -146,6 +140,6 @@ public class BackendMain {
         catch (Exception e) {
             return "Other Error: " + db + " " + e.getMessage();
         }
-        return result.toString();
+        
     }
 }

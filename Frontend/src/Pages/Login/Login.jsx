@@ -44,7 +44,7 @@ const Login = () => {
 
       function handleCreateAccount(){
         //console.log("try to create account");
-        return "INSERT INTO users (user_id, username, email, password_hash) VALUES (1, '" + email + "', '" + email + "1', '" + password + "')";
+        return "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "1', '" + password + "')";
       }
 
     return (
