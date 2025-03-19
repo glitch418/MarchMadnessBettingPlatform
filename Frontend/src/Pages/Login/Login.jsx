@@ -2,13 +2,11 @@ import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
-import Navbar from "../../components/Navbar/Navbar";
 
 // Import the backend query function using HTTP
 import { queryBackend } from '../../utils/api';
 
 const Login = () => {
-    // States to manage user input
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +14,6 @@ const Login = () => {
       const [queryResult, setQueryResult] = useState('');
     const navigate = useNavigate();
 
-    // On sign in
     function handleSubmit(e) {
         e.preventDefault();
         
@@ -72,7 +69,7 @@ const Login = () => {
             {/*TODO: handle forgot password */}
             <button type="button" onClick={() => (console.log(queryInput))}>Forgot Password?</button>
         </div>
-    );
-};
+    )
+}
   
-export default Login;
+  export default Login;
