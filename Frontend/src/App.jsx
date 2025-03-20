@@ -24,6 +24,8 @@ const App = () => {
           {/* MyBets Page */}
           <Route path="/myBets" element={<MyBets/>} />
 
+		  {/* Games Page */}
+		  <Route path="/games" element={<Games />} />  
           {/* Any undefined paths redirect to Home */}
           <Route path="*" element={<Home/>} />
         </Routes>

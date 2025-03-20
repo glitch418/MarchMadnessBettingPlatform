@@ -5,7 +5,7 @@ import home from "../../assets/home.png";
 import bet from "../../assets/bet.png";
 import search from "../../assets/search.png";
 import profile from "../../assets/profile.png";
-
+import games from '../../assets/games-icon.png';
 const Navbar = () => {
     const navigate = useNavigate();
     const [searchInput, setSearchInput] = useState("");
@@ -61,6 +61,12 @@ const Navbar = () => {
                     <img id="bet-icon" src={bet} alt="My Bets" width={35} height={35}/>
                     <p>My Bets</p>
                 </div>
+				
+				{/* Games */}
+				<div className="nav-item" onClick={() => navigate('/games')}>
+					<img id="games-icon" src={games} alt="Games" width={35} height={35}/>
+					<p>Games</p>
+				</div>
             </div>
 
             {/* Middle Element */}
