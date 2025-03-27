@@ -1,6 +1,6 @@
 export const queryBackend = async (query) => {
     try {
-        const response = await fetch(`http://localhost:5000/query?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`http://localhost:5001/query?q=${encodeURIComponent(query)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }

@@ -17,7 +17,7 @@ public class BackendMain {
     }
 
     public static void startHttpServer() throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(5000), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
         server.createContext("/query", new QueryHandler());
         server.setExecutor(null);
         server.start();
@@ -100,21 +100,46 @@ public class BackendMain {
     //  HTTP API-compatible query execution
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
+        String db = "not set";
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            ResultSetMetaData metaData = rs.getMetaData();
-            while (rs.next()) {
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    result.append(rs.getString(i)).append(" ");
+             
+             ) {
+                ResultSet rs = null;
+                if (query.toLowerCase().contains("select")) {
+                    db = "select";
+                    query = query.substring(2);
+                    rs = stmt.executeQuery(query);
+                    
+                } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
+                    query = query.substring(2);
+                    rs = null;
+                    db = "update " + query;
+                    stmt.executeUpdate(query);
                 }
-                result.append("\n");
+                else {
+                    rs = null;
+                }
+            if(rs != null) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                while (rs.next()) {
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        result.append(rs.getString(i)).append(" ");
+                    }
+                    result.append("\n");
+                }
             }
+            return result.toString();
+            
         } catch (SQLException e) {
-            return "SQL Error: " + e.getMessage();
+            System.out.println(e.getMessage());
+            return "SQL Error: " + query + " " + e.getMessage();
+            
         }
-        return result.toString();
+        catch (Exception e) {
+            return "Other Error: " + db + " " + e.getMessage();
+        }
+        
     }
 }

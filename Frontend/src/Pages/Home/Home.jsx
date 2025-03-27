@@ -6,7 +6,7 @@ import Bracket from "../../components/Bracket/Bracket";
 
 const Home = () => {
     return (
-     <div className="home-container" style = {{backgroundColor: 'hsl(0, 0%, 27%)'}}>
+     <div>
          <Navbar/>
          <div style={{paddingTop: '80px'}}>
             {/* ENABLE/DISABLE query box by commenting out: <Query/> */}
