@@ -3,12 +3,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import MyBets from './Pages/MyBets/MyBets';
-
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
- 
-
   return (
     <>
       {/* Original Routing Code (Untouched) */}
