@@ -1,0 +1,29 @@
+.bracket-container {
+    position: relative;
+    display: inline-block;
+}
+
+.bracket-team {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.bracket-team-1 {
+    top: 0;
+}
+
+.bracket-team-2 {
+    bottom: 0;
+}
+
+.bracket-team-text {
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

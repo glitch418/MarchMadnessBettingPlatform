@@ -1,22 +1,46 @@
-import React from "react";
+import React, { useRef, useEffect } from 'react';
 import "./Bracket.css";
-import BracketHeader from "../BracketHeader/BracketHeader";
 
 
-const Bracket = ({teamData = {}}) => {
+/*
+Reusable component to render bracket
+Team should contain image, seed, name, score
+*/
+const Bracket = ({ team1, team2, width = 175, height = 75 }) => {
+    const canvasRef = useRef(null);
+    const boxHeight = height / 2;
+    const paddingTop = height / 5;
+  
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const context = canvas.getContext('2d');
+        canvas.width = width;
+        canvas.height = height;
+  
+        context.clearRect(0, 0, width, height);
+        context.strokeStyle = "orange";
+  
+        context.strokeRect(0, 0, width, boxHeight);
+        context.strokeRect(0, boxHeight, width, boxHeight);
+      }
+    }, [team1, team2, width, height, boxHeight]);
+  
     return (
-     <div>
-        <BracketHeader/>
-        <svg width="800" height="600">
-            <line x1="100" y1="50" x2="200" y2="50" stroke="black" />
-            <line x1="100" y1="150" x2="200" y2="150" stroke="black" />
-            <line x1="200" y1="50" x2="200" y2="150" stroke="black" />
-            <text x="50" y="55" fontSize="16">{"team1"}</text>
-            <text x="50" y="155" fontSize="16">{"team2"}</text>
-         </svg>
-
-     </div>
-    )
-  }
+      <div className="bracket-container" style={{ width: width, height: height }}>
+        <canvas ref={canvasRef} width={width} height={height} />
+        <div className="bracket-team bracket-team-1" style={{ height: boxHeight }}>
+          <div className="bracket-team-text" style={{ paddingTop: paddingTop }}>
+            {team1}
+          </div>
+        </div>
+        <div className="bracket-team bracket-team-2" style={{ height: boxHeight }}>
+          <div className="bracket-team-text" style={{ paddingTop: paddingTop }}>
+            {team2}
+          </div>
+        </div>
+      </div>
+    );
+  };
   
   export default Bracket;
