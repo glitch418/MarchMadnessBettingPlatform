@@ -5,6 +5,7 @@ import "./Login.css";
 
 // Import the backend query function using HTTP
 import { queryBackend } from '../../utils/api';
+import { backendLogin } from '../../utils/api';
 
 const Login = () => {
     const [password, setPassword] = useState("");
@@ -33,7 +34,7 @@ const Login = () => {
         
         try {
           console.log("running...");
-            const result = await queryBackend(query); // Send custom query via HTTP
+            const result = await backendLogin(email + password); // Send custom query via HTTP
             console.log(result);
             setQueryResult(result); 
             return result;// Display results
