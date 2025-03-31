@@ -16,10 +16,13 @@ const Login = () => {
     const navigate = useNavigate();
 
     function handleSubmit(e) {
+      
         e.preventDefault();
+        console.log("called...");
         
         //TODO: check credentials
         if (handleLogin()){
+            console.log("Login successful");
             navigate("/");
         }
     }
@@ -34,7 +37,7 @@ const Login = () => {
         
         try {
           console.log("running...");
-            const result = await backendLogin(email + password); // Send custom query via HTTP
+            const result = await queryBackend(query); // Send custom query via HTTP
             console.log(result);
             setQueryResult(result); 
             return result;// Display results
@@ -50,8 +53,9 @@ const Login = () => {
       }
 
       function handleLogin() {
-        let x = ("SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'");
-        handleQuery(x);
+        let x = backendLogin(email, password);
+        console.log(x);
+        return x;
       }
 
     return (
@@ -61,7 +65,7 @@ const Login = () => {
                 <input placeholder="example@email.com" onChange={(e) => {setEmail(e.target.value);}}/>
                 <input type={showPassword ? "text" : "password"} placeholder="password" onChange={(e) => {setPassword(e.target.value);}}/>
                 <div><input onChange={() => setShowPassword(!showPassword)} type="checkbox"/> <p> Show Password</p></div>  
-                <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+                <button onClick={handleSubmit} type="button"  disabled={!email.trim() || !password.trim()}>Sign in</button>
             </form>
 
             {/*TODO: handle create account */}

@@ -64,10 +64,14 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
-                String query = exchange.getRequestURI().toString();
+                String query = exchange.getRequestURI().getQuery();
                 int qIndex = query.indexOf("email");
-                System.out.println(query + " " + qIndex);
-                String response = executeQuery(query);
+                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
+                String password = query.substring(query.indexOf("pass") + 5);
+                String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
@@ -100,11 +104,11 @@ public class BackendMain {
                 ResultSet rs = null;
                 if (query.toLowerCase().contains("select")) {
                     db = "select";
-                    query = query.substring(2);
+                    //query = query.substring(2);
                     rs = stmt.executeQuery(query);
                     
                 } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
-                    query = query.substring(2);
+                    //query = query.substring(2);
                     rs = null;
                     db = "update " + query;
                     stmt.executeUpdate(query);
