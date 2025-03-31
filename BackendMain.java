@@ -64,7 +64,7 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
-                String query = exchange.getRequestURI().getQuery();
+                String query = exchange.getRequestURI().toString();
                 int qIndex = query.indexOf("email");
                 System.out.println(query + " " + qIndex);
                 String response = executeQuery(query);

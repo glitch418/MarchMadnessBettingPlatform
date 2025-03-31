@@ -13,7 +13,7 @@ export const queryBackend = async (query) => {
 
 export const backendLogin = async (email, password) => {
     try {
-        const response = await fetch(`http://localhost:5001/login?email=${encodeURIComponent(email)}?pass=${encodeUIRComponent(password)}`);
+        const response = await fetch(`http://localhost:5001/login?email=${email},pass=${password}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
