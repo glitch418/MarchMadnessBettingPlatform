@@ -78,6 +78,8 @@ public class BackendMain {
                 System.out.println("email: " + email);
                 System.out.println("password: " + password);
                 String response = executeQuery(fQuery);
+
+                //closing boilerplate
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
