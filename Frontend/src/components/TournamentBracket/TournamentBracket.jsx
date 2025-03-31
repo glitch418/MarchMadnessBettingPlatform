@@ -167,8 +167,8 @@ const TournamentBracket = (props) => {
                     { name: "Sweet 16", date: "3/27-3/28"},
                     { name: "Second Round", date: "3/22-3/23"},
                     { name: "First Round", date: "3/20-3/21"}
-                ].map((round) => (
-                    <div key={round.name} style={{ textAlign: "center", flex: 1, fontSize: '12px'}}>
+                ].map((round, i) => (
+                    <div key={`${round.name}-${i}`} style={{ textAlign: "center", flex: 1, fontSize: '12px'}}>
                         <p>{round.name}</p>
                         <p>{round.date}</p>
                     </div>
