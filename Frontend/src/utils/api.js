@@ -23,3 +23,16 @@ export const backendLogin = async (email, password) => {
         return "Error: Unable to fetch data";
     }
 };
+
+export const backendSignUp = async (email, password) => {
+    try {
+        const response = await fetch(`http://localhost:5001/signup?email=${encodeURIComponent(email)}&pass=${encodeURIComponent(password)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return await response.text();
+    } catch (error) {
+        console.error("Error querying backend:", error);
+        return "Error: Unable to fetch data";
+    }
+};

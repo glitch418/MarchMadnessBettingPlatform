@@ -17,6 +17,7 @@ public class BackendMain {
         HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
         server.createContext("/query", new QueryHandler());
         server.createContext("/login", new LoginHandler());
+        server.createContext("/signup", new SignUpHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
@@ -36,7 +37,7 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
-                String query = exchange.getRequestURI().getQuery();
+                String query = exchange.getRequestURI().getQuery().substring(2);
                 System.out.println(query);
                 String response = executeQuery(query);
                 exchange.sendResponseHeaders(200, response.length());
@@ -69,6 +70,39 @@ public class BackendMain {
                 String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
                 String password = query.substring(query.indexOf("pass") + 5);
                 String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            }
+        }
+    }
+
+    static class SignUpHandler extends QueryHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight requests
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                int qIndex = query.indexOf("email");
+                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
+                String password = query.substring(query.indexOf("pass") + 5);
+                String fQuery = "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')";
                 System.out.println("email: " + email);
                 System.out.println("password: " + password);
                 String response = executeQuery(fQuery);

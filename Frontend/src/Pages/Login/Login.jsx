@@ -6,6 +6,7 @@ import "./Login.css";
 // Import the backend query function using HTTP
 import { queryBackend } from '../../utils/api';
 import { backendLogin } from '../../utils/api';
+import { backendSignUp } from '../../utils/api';
 
 const Login = () => {
     const [password, setPassword] = useState("");
@@ -48,8 +49,7 @@ const Login = () => {
       };
 
       function handleCreateAccount() {
-        let x = ("INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')");
-        handleQuery(x);
+        backendSignUp(email, password)
       }
 
       function handleLogin() {
