@@ -5,6 +5,8 @@ import "./Login.css";
 
 // Import the backend query function using HTTP
 import { queryBackend } from '../../utils/api';
+import { backendLogin } from '../../utils/api';
+import { backendSignUp } from '../../utils/api';
 
 const Login = () => {
     const [password, setPassword] = useState("");
@@ -15,10 +17,13 @@ const Login = () => {
     const navigate = useNavigate();
 
     function handleSubmit(e) {
+      
         e.preventDefault();
+        console.log("called...");
         
-        //TODO: check credentials
+        //checks if email and password matches an entry in the database
         if (handleLogin()){
+            console.log("Login successful");
             navigate("/");
         }
     }
@@ -43,14 +48,16 @@ const Login = () => {
         }
       };
 
+      // sends email and password for account creation to backend
       function handleCreateAccount() {
-        let x = ("INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')");
-        handleQuery(x);
+        backendSignUp(email, password)
       }
 
+      // sends email and password to backend for verification
       function handleLogin() {
-        let x = ("SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'");
-        handleQuery(x);
+        let x = backendLogin(email, password);
+        console.log(x);
+        return x;
       }
 
     return (
@@ -60,7 +67,7 @@ const Login = () => {
                 <input placeholder="example@email.com" onChange={(e) => {setEmail(e.target.value);}}/>
                 <input type={showPassword ? "text" : "password"} placeholder="password" onChange={(e) => {setPassword(e.target.value);}}/>
                 <div><input onChange={() => setShowPassword(!showPassword)} type="checkbox"/> <p> Show Password</p></div>  
-                <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+                <button onClick={handleSubmit} type="button"  disabled={!email.trim() || !password.trim()}>Sign in</button>
             </form>
 
             {/*TODO: handle create account */}
