@@ -1,0 +1,123 @@
+{
+    "regions": {
+        "South": {
+            "firstFour": [
+                [{"seed": 16, "name": "Norfolk State", "score": "54"}, {"seed": 16, "name": "Appalachian State", "score": "53"}]
+            ],
+            "first": [
+                [{"seed": 1, "name": "Gonzaga", "score": "98"}, {"seed": 16, "name": "Norfolk State", "score": "55"}],
+                [{"seed": null, "name": null, "score": null}, {"seed": 9, "name": "Missouri", "score": "68"}],
+                [{"seed": 5, "name": "Creighton", "score": "63"}, {"seed": 12, "name": "UC Santa Barbara", "score": "65"}],
+                [{"seed": 4, "name": "Virginia", "score": "58"}, {"seed": 13, "name": "Ohio", "score": "62"}],
+                [{"seed": 6, "name": "USC", "score": "72"}, {"seed": 11, "name": "Drake", "score": "56"}],
+                [{"seed": 3, "name": "Kansas", "score": "93"}, {"seed": 14, "name": "Eastern Washington", "score": "84"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 10, "name": "VCU", "score": "0"}],
+                [{"seed": 2, "name": "Iowa", "score": "86"}, {"seed": 15, "name": "Grand Canyon", "score": "74"}]
+            ],
+            "second": [
+                [{"seed": 1, "name": "Gonzaga", "score": "87"}, {"seed": 8, "name": "Oklahoma", "score": "71"}],
+                [{"seed": 5, "name": "Creighton", "score": "72"}, {"seed": 13, "name": "Ohio", "score": "58"}],
+                [{"seed": 6, "name": "USC", "score": "85"}, {"seed": 3, "name": "Kansas", "score": "51"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 2, "name": "Iowa", "score": "80"}]
+            ],
+            "sweet16": [
+                [{"seed": 1, "name": "Gonzaga", "score": "83"}, {"seed": 5, "name": "Creighton", "score": "65"}],
+                [{"seed": 6, "name": "USC", "score": "82"}, {"seed": 7, "name": "Oregon", "score": "68"}]
+            ],
+            "elite8": [
+                [{"seed": 1, "name": "Gonzaga", "score": "85"}, {"seed": 6, "name": "USC", "score": "66"}]
+            ]
+        },
+        "East": {
+            "firstFour": [
+                [{"seed": 16, "name": "Norfolk State", "score": "54"}, {"seed": 16, "name": "Appalachian State", "score": "53"}]
+            ],
+            "first": [
+                [{"seed": 1, "name": "Gonzaga", "score": "98"}, {"seed": 16, "name": "Norfolk State", "score": "55"}],
+                [{"seed": 8, "name": "Oklahoma", "score": "72"}, {"seed": 9, "name": "Missouri", "score": "68"}],
+                [{"seed": 5, "name": "Creighton", "score": "63"}, {"seed": 12, "name": "UC Santa Barbara", "score": "62"}],
+                [{"seed": 4, "name": "Virginia", "score": "58"}, {"seed": 13, "name": "Ohio", "score": "62"}],
+                [{"seed": 6, "name": "USC", "score": "72"}, {"seed": 11, "name": "Drake", "score": "56"}],
+                [{"seed": 3, "name": "Kansas", "score": "93"}, {"seed": 14, "name": "Eastern Washington", "score": "84"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 10, "name": "VCU", "score": "0"}],
+                [{"seed": 2, "name": "Iowa", "score": "86"}, {"seed": 15, "name": "Grand Canyon", "score": "74"}]
+            ],
+            "second": [
+                [{"seed": 1, "name": "Gonzaga", "score": "87"}, {"seed": 8, "name": "Oklahoma", "score": "71"}],
+                [{"seed": 5, "name": "Creighton", "score": "72"}, {"seed": 13, "name": "Ohio", "score": "58"}],
+                [{"seed": 6, "name": "USC", "score": "85"}, {"seed": 3, "name": "Kansas", "score": "51"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 2, "name": "Iowa", "score": "80"}]
+            ],
+            "sweet16": [
+                [{"seed": 1, "name": "Gonzaga", "score": "83"}, {"seed": 5, "name": "Creighton", "score": "65"}],
+                [{"seed": 6, "name": "USC", "score": "82"}, {"seed": 7, "name": "Oregon", "score": "68"}]
+            ],
+            "elite8": [
+                [{"seed": 1, "name": "Gonzaga", "score": "85"}, {"seed": 6, "name": "USC", "score": "66"}]
+            ]
+        },
+        "West": {
+            "firstFour": [
+                [{"seed": 16, "name": "Norfolk State", "score": "54"}, {"seed": 16, "name": "Appalachian State", "score": "53"}]
+            ],
+            "first": [
+                [{"seed": 1, "name": "Gonzaga", "score": "98"}, {"seed": 16, "name": "Norfolk State", "score": "55"}],
+                [{"seed": 8, "name": "Oklahoma", "score": "72"}, {"seed": 9, "name": "Missouri", "score": "68"}],
+                [{"seed": 5, "name": "Creighton", "score": "63"}, {"seed": 12, "name": "UC Santa Barbara", "score": "62"}],
+                [{"seed": 4, "name": "Virginia", "score": "58"}, {"seed": 13, "name": "Ohio", "score": "62"}],
+                [{"seed": 6, "name": "USC", "score": "72"}, {"seed": 11, "name": "Drake", "score": "56"}],
+                [{"seed": 3, "name": "Kansas", "score": "93"}, {"seed": 14, "name": "Eastern Washington", "score": "84"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 10, "name": "VCU", "score": "0"}],
+                [{"seed": 2, "name": "Iowa", "score": "86"}, {"seed": 15, "name": "Grand Canyon", "score": "74"}]
+            ],
+            "second": [
+                [{"seed": 1, "name": "Gonzaga", "score": "87"}, {"seed": 8, "name": "Oklahoma", "score": "71"}],
+                [{"seed": 5, "name": "Creighton", "score": "72"}, {"seed": 13, "name": "Ohio", "score": "58"}],
+                [{"seed": 6, "name": "USC", "score": "85"}, {"seed": 3, "name": "Kansas", "score": "51"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 2, "name": "Iowa", "score": "80"}]
+            ],
+            "sweet16": [
+                [{"seed": 1, "name": "Gonzaga", "score": "83"}, {"seed": 5, "name": "Creighton", "score": "65"}],
+                [{"seed": 6, "name": "USC", "score": "82"}, {"seed": 7, "name": "Oregon", "score": "68"}]
+            ],
+            "elite8": [
+                [{"seed": 1, "name": "Gonzaga", "score": "85"}, {"seed": 6, "name": "USC", "score": "66"}]
+            ]
+        },
+        "Midwest": {
+            "firstFour": [
+                [{"seed": 16, "name": "Norfolk State", "score": "54"}, {"seed": 16, "name": "Appalachian State", "score": "53"}]
+            ],
+            "first": [
+                [{"seed": 1, "name": "Gonzaga", "score": "98"}, {"seed": 16, "name": "Norfolk State", "score": "55"}],
+                [{"seed": 8, "name": "Oklahoma", "score": "72"}, {"seed": 9, "name": "Missouri", "score": "68"}],
+                [{"seed": 5, "name": "Creighton", "score": "63"}, {"seed": 12, "name": "UC Santa Barbara", "score": "62"}],
+                [{"seed": 4, "name": "Virginia", "score": "58"}, {"seed": 13, "name": "Ohio", "score": "62"}],
+                [{"seed": 6, "name": "USC", "score": "72"}, {"seed": 11, "name": "Drake", "score": "56"}],
+                [{"seed": 3, "name": "Kansas", "score": "93"}, {"seed": 14, "name": "Eastern Washington", "score": "84"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 10, "name": "VCU", "score": "0"}],
+                [{"seed": 2, "name": "Iowa", "score": "86"}, {"seed": 15, "name": "Grand Canyon", "score": "74"}]
+            ],
+            "second": [
+                [{"seed": 1, "name": "Gonzaga", "score": "87"}, {"seed": 8, "name": "Oklahoma", "score": "71"}],
+                [{"seed": 5, "name": "Creighton", "score": "72"}, {"seed": 13, "name": "Ohio", "score": "58"}],
+                [{"seed": 6, "name": "USC", "score": "85"}, {"seed": 3, "name": "Kansas", "score": "51"}],
+                [{"seed": 7, "name": "Oregon", "score": "95"}, {"seed": 2, "name": "Iowa", "score": "80"}]
+            ],
+            "sweet16": [
+                [{"seed": 1, "name": "Gonzaga", "score": "83"}, {"seed": 5, "name": "Creighton", "score": "65"}],
+                [{"seed": 6, "name": "USC", "score": "82"}, {"seed": 7, "name": "Oregon", "score": "68"}]
+            ],
+            "elite8": [
+                [{"seed": 1, "name": "Gonzaga", "score": "85"}, {"seed": 6, "name": "USC", "score": "66"}]
+            ]
+        }
+    },
+    "finalFour": [
+        [{"seed": 1, "name": "Gonzaga", "score": "93"}, {"seed": 11, "name": "UCLA", "score": "90"}],
+        [{"seed": 1, "name": "Baylor", "score": "78"}, {"seed": 2, "name": "Houston", "score": "59"}]
+    ],
+    "championship": [
+        [{"seed": 1, "name": "Gonzaga", "score": "70"}, {"seed": 1, "name": "Baylor", "score": "86"}]
+    ]
+}

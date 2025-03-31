@@ -7,3 +7,4 @@ Home Icon: https://www.flaticon.com/free-icon/home_1946488?term=home&page=1&posi
 Bet Icon: https://www.flaticon.com/free-icon/casino-chip_2228731?term=bet&page=1&position=12&origin=search&related_id=2228731
 Search Icon: https://www.flaticon.com/free-icon/search_149852?term=search&page=1&position=2&origin=tag&related_id=149852 
 Profile Icon: https://www.flaticon.com/free-icon/user_149071?term=profile&page=1&position=9&origin=tag&related_id=149071 
+Final Four Icon: https://i.turner.ncaa.com/sites/default/files/cssu/mml/2025/bracket/finalfourlogo.svg
