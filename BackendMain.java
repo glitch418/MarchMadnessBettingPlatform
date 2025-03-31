@@ -49,7 +49,9 @@ public class BackendMain {
             }
         }
     }
-
+    /**
+     * LoginHandler class to handle login requests.
+     */
     static class LoginHandler extends QueryHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -65,10 +67,13 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
+                // gets url key value pairs and manually parses them for email and password
                 String query = exchange.getRequestURI().getQuery();
                 int qIndex = query.indexOf("email");
                 String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
                 String password = query.substring(query.indexOf("pass") + 5);
+
+                // creates sql query to pass to general query handler
                 String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
                 System.out.println("email: " + email);
                 System.out.println("password: " + password);
@@ -83,6 +88,9 @@ public class BackendMain {
         }
     }
 
+    /**
+     * SignUpHandler class to handle signup requests.
+     */
     static class SignUpHandler extends QueryHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
@@ -130,12 +138,16 @@ public class BackendMain {
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
         String db = "not set";
+
+        // creates connection to database
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
              
              ) {
                 ResultSet rs = null;
+
+                // checks query type
                 if (query.toLowerCase().contains("select")) {
                     db = "select";
                     //query = query.substring(2);

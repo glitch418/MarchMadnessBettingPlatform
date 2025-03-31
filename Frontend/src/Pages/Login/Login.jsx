@@ -21,7 +21,7 @@ const Login = () => {
         e.preventDefault();
         console.log("called...");
         
-        //TODO: check credentials
+        //checks if email and password matches an entry in the database
         if (handleLogin()){
             console.log("Login successful");
             navigate("/");
@@ -48,10 +48,12 @@ const Login = () => {
         }
       };
 
+      // sends email and password for account creation to backend
       function handleCreateAccount() {
         backendSignUp(email, password)
       }
 
+      // sends email and password to backend for verification
       function handleLogin() {
         let x = backendLogin(email, password);
         console.log(x);
