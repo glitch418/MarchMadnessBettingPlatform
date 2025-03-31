@@ -76,8 +76,56 @@ public class BackendMain {
 
             dbCxn.close();
 
-        } catch (Exception e) {
-            System.out.println("Command-line Query Error: " + e.getMessage());
+                // creates sql query to pass to general query handler
+                String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
+
+                //closing boilerplate
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            }
+        }
+    }
+
+    /**
+     * SignUpHandler class to handle signup requests.
+     */
+    static class SignUpHandler extends QueryHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            // Handle preflight requests
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                int qIndex = query.indexOf("email");
+                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
+                String password = query.substring(query.indexOf("pass") + 5);
+                String fQuery = "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            }
         }
     }
 
