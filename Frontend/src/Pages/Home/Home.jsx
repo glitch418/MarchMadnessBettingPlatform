@@ -9,10 +9,12 @@ const Home = () => {
     return (
      <div>
          <Navbar/>
-         <div style={{paddingTop: '80px'}}>
+         <div style={{paddingTop: '80px', display: 'flex', justifyContent: 'center'}}>
             {/* ENABLE/DISABLE query box by commenting out: */}
             {/* <Query/> */}
+            <div>
             <TournamentBracket />
+            </div>
         </div>
      </div>
     )
