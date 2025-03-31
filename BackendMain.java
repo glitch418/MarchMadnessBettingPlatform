@@ -11,16 +11,17 @@ public class BackendMain {
     public static void main(String[] args) throws IOException {
         // Start HTTP server for frontend communication
         startHttpServer();
+
+        // Keep the existing command-line query functionality
+        runCommandLineQuery();
     }
 
     public static void startHttpServer() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
         server.createContext("/query", new QueryHandler());
-        server.createContext("/login", new LoginHandler());
-        server.createContext("/signup", new SignUpHandler());
         server.setExecutor(null);
         server.start();
-        System.out.println("HTTP server running on port 5001");
+        System.out.println("HTTP server running on port 5000");
     }
 
     static class QueryHandler implements HttpHandler {
@@ -37,8 +38,7 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
-                String query = exchange.getRequestURI().getQuery().substring(2);
-                System.out.println(query);
+                String query = exchange.getRequestURI().getQuery();
                 String response = executeQuery(query);
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
@@ -49,78 +49,35 @@ public class BackendMain {
             }
         }
     }
-    /**
-     * LoginHandler class to handle login requests.
-     */
-    static class LoginHandler extends QueryHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers
-            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
 
-            // Handle preflight requests
-            if ("OPTIONS".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
+    // Philip's Database Connection
+    public static void runCommandLineQuery() {
+        try {
+            Connection dbCxn = DriverManager.getConnection(
+                "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+
+            String testQuery = receiveQuery();
+            System.out.println("Executing query: " + testQuery);
+
+            if (testQuery.toLowerCase().contains("select")) {
+                ResultSet rs = exeSelect(testQuery, dbCxn);
+                while (rs.next()) {
+                    ResultSetMetaData rsMeta = rs.getMetaData();
+                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
+                        if (i > 1) System.out.print(",  ");
+                        String columnValue = rs.getString(i);
+                        System.out.print(columnValue + " " + rsMeta.getColumnName(i));
+                    }
+                    System.out.println();
+                }
+            } else if (testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
+                exeUpdate(testQuery, dbCxn);
             }
 
-            if ("GET".equals(exchange.getRequestMethod())) {
-                // gets url key value pairs and manually parses them for email and password
-                String query = exchange.getRequestURI().getQuery();
-                int qIndex = query.indexOf("email");
-                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
-                String password = query.substring(query.indexOf("pass") + 5);
+            dbCxn.close();
 
-                // creates sql query to pass to general query handler
-                String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
-                System.out.println("email: " + email);
-                System.out.println("password: " + password);
-                String response = executeQuery(fQuery);
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-            }
-        }
-    }
-
-    /**
-     * SignUpHandler class to handle signup requests.
-     */
-    static class SignUpHandler extends QueryHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers
-            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
-
-            // Handle preflight requests
-            if ("OPTIONS".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("GET".equals(exchange.getRequestMethod())) {
-                String query = exchange.getRequestURI().getQuery();
-                int qIndex = query.indexOf("email");
-                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
-                String password = query.substring(query.indexOf("pass") + 5);
-                String fQuery = "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')";
-                System.out.println("email: " + email);
-                System.out.println("password: " + password);
-                String response = executeQuery(fQuery);
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-            }
+        } catch (Exception e) {
+            System.out.println("Command-line Query Error: " + e.getMessage());
         }
     }
 
@@ -134,27 +91,29 @@ public class BackendMain {
         stmt.executeUpdate(query);
     }
 
+    public static String receiveQuery() {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("What would you like to query: ");
+        return scan.nextLine();
+    }
+
     //  HTTP API-compatible query execution
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
         String db = "not set";
-
-        // creates connection to database
         try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
              
              ) {
                 ResultSet rs = null;
-
-                // checks query type
                 if (query.toLowerCase().contains("select")) {
                     db = "select";
-                    //query = query.substring(2);
+                    query = query.substring(2);
                     rs = stmt.executeQuery(query);
                     
                 } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
-                    //query = query.substring(2);
+                    query = query.substring(2);
                     rs = null;
                     db = "update " + query;
                     stmt.executeUpdate(query);
