@@ -195,6 +195,7 @@ const TournamentBracket = (props) => {
                                     team2={matchup[1]}
                                     width={bracketWidth}
                                     height={bracketHeight}
+                                    reverse={region == 'East' || region == 'Midwest'}
                                 />
                             </div>
                         ))

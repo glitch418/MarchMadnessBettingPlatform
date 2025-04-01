@@ -24,24 +24,13 @@ const Bracket = ({
   }
 
   const renderTeamContent = (team) => {
-    if (reverse) {
-      return (
-        <>
-          <div className="score">{team.score}</div>
-          <div className="team-name">{team.name}</div>
-          <div className="seed">{team.seed}</div>
-        </>
-      );
-    } 
-    else {
-      return (
-        <>
-          <div className="seed">{team.seed}</div>
-          <div className="team-name">{team.name}</div>
-          <div className="score">{team.score}</div>
-        </>
-      );
-    }
+    return (
+      <div className={`team-content ${reverse ? 'reverse' : ''}`}>
+        <div className="seed">{team.seed}</div>
+        <div className="team-name">{team.name}</div>
+        <div className="score">{team.score}</div>
+      </div>
+    );
   };
 
   return (
