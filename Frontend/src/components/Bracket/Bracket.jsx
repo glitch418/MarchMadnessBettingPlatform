@@ -6,7 +6,6 @@ const Bracket = ({
   team2 = null,
   width = 220, 
   height = 80, 
-  winner = null,
   onTeamClick = () => {},
   reverse = false 
 }) => {
