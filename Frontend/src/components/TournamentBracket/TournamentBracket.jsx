@@ -25,7 +25,7 @@ const TournamentBracket = (props) => {
 
     // Horizontal spacing between each round
     const hSp1 = 10;
-    const hSp2 = -50;
+    const hSp2 = -20;
     const hSp3 = -50;
 
     // Initial vertical spacing, the subsequent positions are calculated

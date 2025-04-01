@@ -77,7 +77,7 @@ const Bracket = ({
         style={{ 
           top: 0, 
           backgroundColor: team1Winner ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-          color: winner == null ? 'black' : team1Winner == false ? "lightgray" : "black"
+          color: (!team1Winner && !team2Winner) ? 'black' : team1Winner == false ? "lightgray" : "black"
         }}
         onClick={() => onTeamClick('team1', t1)}
       >
@@ -90,7 +90,7 @@ const Bracket = ({
         style={{ 
           top: boxHeight, 
           backgroundColor: team2Winner ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-          color: winner == null ? 'black' : team2Winner == false ? "lightgray" : "black"
+          color: (!team1Winner && !team2Winner) ? 'black' : team2Winner == false ? "lightgray" : "black"
         }}
         onClick={() => onTeamClick('team2', t2)}
       >
