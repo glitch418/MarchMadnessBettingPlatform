@@ -34,6 +34,8 @@ const TournamentBracket = (props) => {
     // Division by 8 because 8 brackets need to be rendered in one svg
     const vSp = svgHeight / 8;
 
+    const headerSpacing = [hSp1, hSp1+hSp2, hSp1+hSp2+hSp3];
+
     // Contains calculation to render brackets in corresponding regions
     const bracketRegionConfigs = {
         // top, right, left
@@ -156,7 +158,8 @@ const TournamentBracket = (props) => {
     return (
         <div>
             {/* Round Headers */}
-            <div className="round-headers" style={{ display: "flex", position: "absolute", top: 80, width: "100%" }}>
+            
+            <div className="round-headers" style={{ display: "flex", position: "absolute", top: 80, width: "100%", left: 0}}>
                 {[
                     { name: "First Round", date: "3/20-3/21"},
                     { name: "Second Round", date: "3/22-3/23"},
@@ -168,8 +171,16 @@ const TournamentBracket = (props) => {
                     { name: "Second Round", date: "3/22-3/23"},
                     { name: "First Round", date: "3/20-3/21"}
                 ].map((round, i) => (
-                    <div key={`${round.name}-${i}`} style={{ textAlign: "center", flex: 1, fontSize: '12px'}}>
-                        <p>{round.name}</p>
+                    <div 
+                        key={`${round.name}-${i}`} 
+                        style={{ 
+                            textAlign: "center", 
+                            flex: 1, fontSize: '12px', 
+                            marginRight: i < 3 ? headerSpacing[i] : 'auto',
+                            marginLeft: i > 5 ? headerSpacing[8-i] : 'auto'
+                        }}
+                    >
+                        <p style={{marginBottom: "0.5rem"}}>{round.name}</p>
                         <p>{round.date}</p>
                     </div>
                 ))}
