@@ -3,6 +3,7 @@ import Bracket from "../Bracket/Bracket";
 import finalFourLogo from '../../assets/finalfourlogo.svg';
 import './TournamentBracket.css';
 import mockData from "./mockData.json";
+import { useState, useEffect } from "react";
 
 /*
     Displays entire tournament bracket
@@ -13,26 +14,39 @@ const TournamentBracket = (props) => {
     // Configuration
     // Width and Height of SVG 
     // (SVG covers half of the regions, left and right only ie. top or bottom is not covered together)
-    const svgWidth = screen.width * 49/50;
-    const svgHeight = screen.height/1.5;
+
+    const [svgWidth, setSvgWidth] = useState(window.innerWidth * 49 / 50);
+    const [svgHeight, setSvgHeight] = useState(window.innerHeight / 1.5);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSvgWidth(window.innerWidth * 49 / 50);
+            setSvgHeight(window.innerHeight / 1.5);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // Width and Height of bracket
     const bracketWidth = svgWidth / 8;
     const bracketHeight = svgHeight / 9;
 
     // Font size
-    const regionFontSize = '0.75rem';
+    const regionFontSize = '1.25vh';
 
     // Horizontal spacing between each round
-    const hSp1 = 10;
-    const hSp2 = -50;
-    const hSp3 = -50;
+    const hSp1 = svgWidth/85;
+    const hSp2 = -svgWidth/(hSp1*2);
+    const hSp3 = -svgWidth/(hSp1*5);
 
     // Initial vertical spacing, the subsequent positions are calculated
     // This vertical spacing includes bracket height and thus is
     // Always bigger than bracketHeight
     // Division by 8 because 8 brackets need to be rendered in one svg
     const vSp = svgHeight / 8;
+
+    const headerSpacing = [hSp1, hSp1+hSp2, hSp1+hSp2+hSp3];
 
     // Contains calculation to render brackets in corresponding regions
     const bracketRegionConfigs = {
@@ -156,7 +170,8 @@ const TournamentBracket = (props) => {
     return (
         <div>
             {/* Round Headers */}
-            <div className="round-headers" style={{ display: "flex", position: "absolute", top: 80, width: "100%" }}>
+            
+            <div className="round-headers" style={{ display: "flex", position: "absolute", top: 80, width: "100%", left: 0}}>
                 {[
                     { name: "First Round", date: "3/20-3/21"},
                     { name: "Second Round", date: "3/22-3/23"},
@@ -168,8 +183,17 @@ const TournamentBracket = (props) => {
                     { name: "Second Round", date: "3/22-3/23"},
                     { name: "First Round", date: "3/20-3/21"}
                 ].map((round, i) => (
-                    <div key={`${round.name}-${i}`} style={{ textAlign: "center", flex: 1, fontSize: '12px'}}>
-                        <p>{round.name}</p>
+                    <div 
+                        key={`${round.name}-${i}`} 
+                        style={{ 
+                            textAlign: "center", 
+                            flex: 1, 
+                            marginRight: i < 3 ? headerSpacing[i] : 'auto',
+                            marginLeft: i > 5 ? headerSpacing[8-i] : 'auto',
+                            fontSize: '1.5vh'
+                        }}
+                    >
+                        <p style={{marginBottom: "0.5rem"}}>{round.name}</p>
                         <p>{round.date}</p>
                     </div>
                 ))}
@@ -195,6 +219,7 @@ const TournamentBracket = (props) => {
                                     team2={matchup[1]}
                                     width={bracketWidth}
                                     height={bracketHeight}
+                                    reverse={region == 'East' || region == 'Midwest'}
                                 />
                             </div>
                         ))

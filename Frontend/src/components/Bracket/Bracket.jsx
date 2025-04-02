@@ -1,14 +1,15 @@
 import React from 'react';
 import "./Bracket.css";
+import { useState } from 'react';
+//import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
 
 const Bracket = ({ 
   team1 = null,
   team2 = null,
   width = 220, 
   height = 80, 
-  winner = null,
   onTeamClick = () => {},
-  reverse = false 
+  reverse = false,
 }) => {
   const defaultTeam = { seed: '', name: '', score: null };
   const t1 = { ...defaultTeam, ...(team1 || {}) };
@@ -24,26 +25,35 @@ const Bracket = ({
       team2Winner = team2.score > team1.score;
   }
 
+  const imgT1 = `${team1.name}.png`;
+  const imgT2 = `${team2.name}.png`;
+
   const renderTeamContent = (team) => {
-    if (reverse) {
-      return (
-        <>
-          <div className="score">{team.score}</div>
-          <div className="team-name">{team.name}</div>
-          <div className="seed">{team.seed}</div>
-        </>
-      );
-    } 
-    else {
-      return (
-        <>
-          <div className="seed">{team.seed}</div>
-          <div className="team-name">{team.name}</div>
-          <div className="score">{team.score}</div>
-        </>
-      );
-    }
+    const isTeam1 = team.name === team1.name;
+    const imgSrc = isTeam1 ? imgT1 : imgT2;
+  
+    const [src, setSrc] = useState(imgSrc);
+    const [imgExists, setImgExists] = useState(true);
+  
+    return (
+      <div className={'team-content'}>
+        {imgExists && (
+          <img
+            src={src}
+            alt={`${team.name} logo`}
+            className={`logo${reverse ? '-reverse' : ''}`}
+            onError={() => {
+              setImgExists(false); // setSrc(placeholderTeamIcon)
+            }}
+          />
+        )}
+        <div className={`seed${reverse ? '-reverse' : ''}`}>{team.seed}</div>
+        <div className={`name${reverse ? '-reverse' : ''}`}>{team.name}</div>
+        <div className={`score${reverse ? '-reverse' : ''}`}>{team.score}</div>
+      </div>
+    );
   };
+  
 
   return (
     <div className="bracket-container" style={{ width, height }}>
@@ -77,7 +87,7 @@ const Bracket = ({
         style={{ 
           top: 0, 
           backgroundColor: team1Winner ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-          color: winner == null ? 'black' : team1Winner == false ? "lightgray" : "black"
+          color: (!team1Winner && !team2Winner) ? 'black' : team1Winner == false ? "lightgray" : "black"
         }}
         onClick={() => onTeamClick('team1', t1)}
       >
@@ -90,7 +100,7 @@ const Bracket = ({
         style={{ 
           top: boxHeight, 
           backgroundColor: team2Winner ? 'rgba(255, 165, 0, 0.1)' : 'transparent',
-          color: winner == null ? 'black' : team2Winner == false ? "lightgray" : "black"
+          color: (!team1Winner && !team2Winner) ? 'black' : team2Winner == false ? "lightgray" : "black"
         }}
         onClick={() => onTeamClick('team2', t2)}
       >
@@ -101,16 +111,3 @@ const Bracket = ({
 };
 
 export default Bracket;
-
-{/* 
-{t1.image && (
-  <div className="">
-    <img 
-      src={t1.image}
-      alt={`${t1.name} logo`}
-      className="rounded-full object-contain"
-      style={{ width: imageSize, height: imageSize }}
-    />
-  </div>
-)}
-*/}
