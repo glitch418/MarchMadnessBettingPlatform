@@ -39,7 +39,7 @@
   
   .seed {
     text-align: left;
-    font-size: 60%;
+    font-size: 1.25vh;
     width: 10%;
     padding-left: 0.25rem;
   }
@@ -48,7 +48,7 @@
     text-align: left;
     flex: 1;
     font-weight: bold;
-    font-size: 90%;
+    font-size: 1.5vh;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -58,6 +58,7 @@
     text-align: right;
     padding-right: 0.5rem;
     font-weight: bold;
+    font-size: 1.5vh;
   }
 
   .logo-reverse {
@@ -71,7 +72,7 @@
 
   .seed-reverse {
     text-align: right;
-    font-size: 60%;
+    font-size: 1.25vh;
     width: 10%;
     padding-right: 0.25rem;
     order: 3;
@@ -81,7 +82,7 @@
     text-align: right;
     flex: 1;
     font-weight: bold;
-    font-size: 90%;
+    font-size: 1.5vh;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -93,4 +94,5 @@
     padding-left: 0.5rem;
     font-weight: bold;
     order: 1;
+    font-size: 1.5vh;
   }
