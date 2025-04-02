@@ -1,5 +1,7 @@
 import React from 'react';
 import "./Bracket.css";
+import { useState } from 'react';
+import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
 
 const Bracket = ({ 
   team1 = null,
@@ -7,7 +9,7 @@ const Bracket = ({
   width = 220, 
   height = 80, 
   onTeamClick = () => {},
-  reverse = false 
+  reverse = false,
 }) => {
   const defaultTeam = { seed: '', name: '', score: null };
   const t1 = { ...defaultTeam, ...(team1 || {}) };
@@ -23,15 +25,35 @@ const Bracket = ({
       team2Winner = team2.score > team1.score;
   }
 
+  const imgT1 = `${team1.name}.png`;
+  const imgT2 = `${team2.name}.png`;
+
   const renderTeamContent = (team) => {
+    const isTeam1 = team.name === team1.name;
+    const imgSrc = isTeam1 ? imgT1 : imgT2;
+  
+    const [src, setSrc] = useState(imgSrc);
+    const [imgExists, setImgExists] = useState(true);
+  
     return (
-      <div className={`team-content ${reverse ? 'reverse' : ''}`}>
-        <div className="seed">{team.seed}</div>
-        <div className="team-name">{team.name}</div>
-        <div className="score">{team.score}</div>
+      <div className={'team-content'}>
+        {imgExists && (
+          <img
+            src={src}
+            alt={`${team.name} logo`}
+            className={`logo${reverse ? '-reverse' : ''}`}
+            onError={() => {
+              setImgExists(false); // setSrc(placeholderTeamIcon)
+            }}
+          />
+        )}
+        <div className={`seed${reverse ? '-reverse' : ''}`}>{team.seed}</div>
+        <div className={`name${reverse ? '-reverse' : ''}`}>{team.name}</div>
+        <div className={`score${reverse ? '-reverse' : ''}`}>{team.score}</div>
       </div>
     );
   };
+  
 
   return (
     <div className="bracket-container" style={{ width, height }}>
@@ -89,16 +111,3 @@ const Bracket = ({
 };
 
 export default Bracket;
-
-{/* 
-{t1.image && (
-  <div className="">
-    <img 
-      src={t1.image}
-      alt={`${t1.name} logo`}
-      className="rounded-full object-contain"
-      style={{ width: imageSize, height: imageSize }}
-    />
-  </div>
-)}
-*/}
