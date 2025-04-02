@@ -3,6 +3,7 @@ import Bracket from "../Bracket/Bracket";
 import finalFourLogo from '../../assets/finalfourlogo.svg';
 import './TournamentBracket.css';
 import mockData from "./mockData.json";
+import { useState, useEffect } from "react";
 
 /*
     Displays entire tournament bracket
@@ -13,8 +14,19 @@ const TournamentBracket = (props) => {
     // Configuration
     // Width and Height of SVG 
     // (SVG covers half of the regions, left and right only ie. top or bottom is not covered together)
-    const svgWidth = screen.width * 49/50;
-    const svgHeight = screen.height/1.5;
+
+    const [svgWidth, setSvgWidth] = useState(window.innerWidth * 49 / 50);
+    const [svgHeight, setSvgHeight] = useState(window.innerHeight / 1.5);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSvgWidth(window.innerWidth * 49 / 50);
+            setSvgHeight(window.innerHeight / 1.5);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // Width and Height of bracket
     const bracketWidth = svgWidth / 8;
@@ -24,9 +36,10 @@ const TournamentBracket = (props) => {
     const regionFontSize = '0.75rem';
 
     // Horizontal spacing between each round
-    const hSp1 = 10;
-    const hSp2 = -20;
-    const hSp3 = -50;
+    console.log(svgWidth)
+    const hSp1 = svgWidth/85;
+    const hSp2 = -svgWidth/(hSp1*2);
+    const hSp3 = -svgWidth/(hSp1*5);
 
     // Initial vertical spacing, the subsequent positions are calculated
     // This vertical spacing includes bracket height and thus is
