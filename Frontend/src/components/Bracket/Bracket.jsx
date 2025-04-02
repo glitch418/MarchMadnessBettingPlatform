@@ -1,7 +1,7 @@
 import React from 'react';
 import "./Bracket.css";
 import { useState } from 'react';
-import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
+//import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
 
 const Bracket = ({ 
   team1 = null,
