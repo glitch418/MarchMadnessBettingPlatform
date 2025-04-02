@@ -33,10 +33,9 @@ const TournamentBracket = (props) => {
     const bracketHeight = svgHeight / 9;
 
     // Font size
-    const regionFontSize = '0.75rem';
+    const regionFontSize = '1.25vh';
 
     // Horizontal spacing between each round
-    console.log(svgWidth)
     const hSp1 = svgWidth/85;
     const hSp2 = -svgWidth/(hSp1*2);
     const hSp3 = -svgWidth/(hSp1*5);
@@ -188,9 +187,10 @@ const TournamentBracket = (props) => {
                         key={`${round.name}-${i}`} 
                         style={{ 
                             textAlign: "center", 
-                            flex: 1, fontSize: '12px', 
+                            flex: 1, 
                             marginRight: i < 3 ? headerSpacing[i] : 'auto',
-                            marginLeft: i > 5 ? headerSpacing[8-i] : 'auto'
+                            marginLeft: i > 5 ? headerSpacing[8-i] : 'auto',
+                            fontSize: '1.5vh'
                         }}
                     >
                         <p style={{marginBottom: "0.5rem"}}>{round.name}</p>
