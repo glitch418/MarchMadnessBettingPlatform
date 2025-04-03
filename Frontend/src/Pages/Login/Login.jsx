@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 // Import the backend query function using HTTP
+// Import the backend query function using HTTP
 import { queryBackend } from '../../utils/api';
+import { backendLogin } from '../../utils/api';
+import { backendSignUp } from '../../utils/api';
+
 
 const Login = () => {
     const [password, setPassword] = useState("");
@@ -14,44 +18,52 @@ const Login = () => {
       const [queryResult, setQueryResult] = useState('');
     const navigate = useNavigate();
 
+    // Function to handle form submission
     function handleSubmit(e) {
-        e.preventDefault();
-        
-        //TODO: check credentials
-        if (handleLogin()){
-            navigate("/");
-        }
-    }
+      
+      e.preventDefault();
+      console.log("called...");
+      
+      //checks if email and password matches an entry in the database
+      if (handleLogin()){
+          console.log("Login successful");
+          navigate("/");
+      }
+  }
+
 
     // Function to handle backend query using HTTP
-      const handleQuery = async (query) => {
+    const handleQuery = async (query) => {
+      console.log("running...");
+      if (!query.trim()) {
+        alert('Please enter a valid query.');
+        return;
+      }
+      
+      try {
         console.log("running...");
-        if (!query.trim()) {
-          alert('Please enter a valid query.');
-          return;
-        }
-        
-        try {
-          console.log("running...");
-            const result = await queryBackend(query); // Send custom query via HTTP
-            console.log(result);
-            setQueryResult(result); 
-            return result;// Display results
-        } catch (error) {
-          console.error('Query failed:', error);
-          setQueryResult('Error executing query.');
-        }
-      };
-
-      function handleCreateAccount() {
-        let x = ("INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')");
-        handleQuery(x);
+          const result = await queryBackend(query); // Send custom query via HTTP
+          console.log(result);
+          setQueryResult(result); 
+          return result;// Display results
+      } catch (error) {
+        console.error('Query failed:', error);
+        setQueryResult('Error executing query.');
       }
+    };
 
-      function handleLogin() {
-        let x = ("SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'");
-        handleQuery(x);
-      }
+    // sends email and password for account creation to backend
+    function handleCreateAccount() {
+      backendSignUp(email, password)
+    }
+
+    // sends email and password to backend for verification
+    function handleLogin() {
+      let x = backendLogin(email, password);
+      console.log(x);
+      return x;
+    }
+
 
     return (
         <div>
@@ -67,7 +79,7 @@ const Login = () => {
             <button onClick={handleCreateAccount} type="button">Create Account</button>
 
             {/*TODO: handle forgot password */}
-            <button type="button" onClick={() => (console.log(queryInput))}>Forgot Password?</button>
+            <button type="button" onClick={handleSubmit}>Forgot Password?</button>
         </div>
     )
 }
