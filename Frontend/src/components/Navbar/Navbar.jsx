@@ -6,6 +6,8 @@ import bet from "../../assets/bet.png";
 import search from "../../assets/search.png";
 import profile from "../../assets/profile.png";
 import games from '../../assets/games-icon.png';
+import placeBet from './assets/placebet.png';
+
 const Navbar = () => {
     const navigate = useNavigate();
     const [searchInput, setSearchInput] = useState("");
@@ -28,6 +30,11 @@ const Navbar = () => {
         navigate('/login');
     };
 
+
+    const handlePlaceBetClick = () => {
+        navigate('/placeBet');
+    };
+	
     // Handle search input changes
     const handleSearchChange = (e) => {
         setSearchInput(e.target.value);
@@ -60,6 +67,12 @@ const Navbar = () => {
                 <div className="nav-item" onClick={handleBetsClick}>
                     <img id="bet-icon" src={bet} alt="My Bets" width={35} height={35}/>
                     <p>My Bets</p>
+                </div>
+				
+				{/* Place Bet */}
+                <div className="nav-item" onClick={handlePlaceBetClick}>
+                    <img id="placebet-icon" src={placeBet} alt="Place Bet" width={35} height={35}/>
+                    <p>Place Bet</p>
                 </div>
 				
 				{/* Games */}
