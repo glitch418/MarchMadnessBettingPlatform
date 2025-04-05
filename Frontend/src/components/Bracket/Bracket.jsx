@@ -1,7 +1,8 @@
 import React from 'react';
 import "./Bracket.css";
 import { useState } from 'react';
-//import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
+
+//import placeholderTeamIcon from "TplaceholderTeamIcon.png";
 
 const Bracket = ({ 
   team1 = null,
@@ -25,8 +26,8 @@ const Bracket = ({
       team2Winner = team2.score > team1.score;
   }
 
-  const imgT1 = `${team1.name}.png`;
-  const imgT2 = `${team2.name}.png`;
+  const imgT1 = `/Team_Logos/${team1.name.replaceAll(" ", "_")}.png`;
+  const imgT2 = `/Team_Logos/${team2.name.replaceAll(" ", "_")}.png`;
 
   const renderTeamContent = (team) => {
     const isTeam1 = team.name === team1.name;
