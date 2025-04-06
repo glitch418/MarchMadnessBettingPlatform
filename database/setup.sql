@@ -35,6 +35,7 @@ CREATE TABLE games (
     team2_score INT,                        -- Score for team 2 (inserted by InsertGames).
     team1_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 1 (optional).
     team2_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 2 (optional).
+    round INT,                              -- New column for round (e.g., 0 = First Four, 1 = Round of 64, 2 = Round of 32, etc.)
     FOREIGN KEY (team1_id) REFERENCES teams(team_id),
     FOREIGN KEY (team2_id) REFERENCES teams(team_id)
 );

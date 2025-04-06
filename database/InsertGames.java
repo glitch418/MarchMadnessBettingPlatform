@@ -31,7 +31,7 @@ public class InsertGames {
                 // DEBUG: Print column count and values array
                 // System.out.println("Row " + rowCount + " has " + values.length + " columns: " + Arrays.toString(values));
                 
-                if (values.length >= 8) {
+                if (values.length >= 9) {
                     String team1 = values[1].trim();
                     String team2 = values[3].trim();
                     int team1_score = Integer.parseInt(values[2].trim());
@@ -51,7 +51,17 @@ public class InsertGames {
                     }
                     // DEBUG: Print converted date
                     // System.out.println("Row " + rowCount + ": Converted date = " + mysqlDate);
-                    
+
+                    // Parse round from CSV (9th column, index 8)   
+                    int round = 0;                 
+                    try {
+                        round = Integer.parseInt(values[8].trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Round parse error: " + e.getMessage());
+                        continue;
+                    }
+
+
                     // Look up team IDs from the teams table
                     int team1_id = getTeamId(team1);
                     int team2_id = getTeamId(team2);
@@ -60,7 +70,7 @@ public class InsertGames {
                     //                    ", " + team2 + " -> " + team2_id);
                     
                     if (team1_id != -1 && team2_id != -1) {
-                        insertGame(team1_id, team2_id, team1_score, team2_score, mysqlDate);
+                        insertGame(team1_id, team2_id, team1_score, team2_score, mysqlDate, round);
                     } else {
                         System.out.println("Row " + rowCount + ": Skipping game. Could not find IDs for " 
                             + team1 + " or " + team2);
@@ -107,10 +117,17 @@ public class InsertGames {
 
     /**
      * Inserts a row into the games table.
+     *
+     * @param team1_id    The unique ID of the first team.
+     * @param team2_id    The unique ID of the second team.
+     * @param team1_score The final score of the first team.
+     * @param team2_score The final score of the second team.
+     * @param game_date   The date of the game in "yyyy-MM-dd" format.
+     * @param round       The round identifier (e.g., 1 = Round of 64, 2 = Round of 32, etc.).  // ADDED documentation
      */
-    public static void insertGame(int team1_id, int team2_id, int team1_score, int team2_score, String game_date) {
-        String insertQuery = "INSERT INTO games (team1_id, team2_id, team1_score, team2_score, game_time) " +
-                             "VALUES (?, ?, ?, ?, ?)";
+    public static void insertGame(int team1_id, int team2_id, int team1_score, int team2_score, String game_date, int round) {
+        String insertQuery = "INSERT INTO games (team1_id, team2_id, team1_score, team2_score, game_time, round) "
+                           + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
             pstmt.setInt(1, team1_id);
@@ -118,9 +135,10 @@ public class InsertGames {
             pstmt.setInt(3, team1_score);
             pstmt.setInt(4, team2_score);
             pstmt.setString(5, game_date);
+            pstmt.setInt(6, round); 
             pstmt.executeUpdate();
             // DEBUG: Print confirmation of insertion
-            // System.out.println("Inserted game: " + team1_id + " vs. " + team2_id + " on " + game_date);
+            // System.out.println("Inserted game: " + team1_id + " vs. " + team2_id + " on " + game_date + " (Round " + round + ")");
         } catch (SQLException e) {
             System.out.println("Database Insert Error (insertGame): " + e.getMessage());
         }
