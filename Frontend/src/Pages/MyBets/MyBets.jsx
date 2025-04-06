@@ -1,12 +1,20 @@
 import React from "react";
+import { useLoginStatus } from "../../contexts/LoginStatusContext";
+import { Navigate } from "react-router-dom";
 import "./MyBets.css";
 
 const MyBets = () => {
-    return (
-     <div>
-        <p>Login to see your bets</p>
-     </div>
-    )
+   const { isLoggedIn} = useLoginStatus();
+  
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
   }
   
-  export default MyBets;
+  return (
+    <div>
+      <h1>Hi, {userEmail}!</h1>
+    </div>
+  )
+}
+  
+export default MyBets;

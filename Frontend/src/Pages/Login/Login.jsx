@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoginStatusContext from "../../contexts/LoginStatusContext";
 import "./Login.css";
 
 // Import the backend query function using HTTP
@@ -8,7 +9,6 @@ import "./Login.css";
 import { queryBackend } from '../../utils/api';
 import { backendLogin } from '../../utils/api';
 import { backendSignUp } from '../../utils/api';
-
 
 const Login = () => {
     const [password, setPassword] = useState("");
