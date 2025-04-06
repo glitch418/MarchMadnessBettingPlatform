@@ -27,7 +27,7 @@ public class InsertTeams {
         
         // Extract abbreviations from the games CSV
         Set<String> uniqueTeams = extractAbbreviationsFromGames(CSV_FILE);
-        // UPDATED: Load mapping from abbreviations to team details (team_name, region, seed)
+        // Load mapping from abbreviations to team details (team_name, region, seed)
         Map<String, String[]> teamMapping = loadTeamMapping(MAPPING_CSV);
         // Insert or update each team using the mapping details
         insertOrUpdateTeams(uniqueTeams, teamMapping);
@@ -76,7 +76,7 @@ public class InsertTeams {
     }
 
     /**
-     * UPDATED: Loads teams_mapping.csv file, building a map of abbreviation to team details.
+     * Loads teams_mapping.csv file, building a map of abbreviation to team details.
      * The mapping CSV is expected to have 4 columns: abbreviation, team_name, region, seed.
      * Returns a Map where the key is the abbreviation and the value is a String array: [team_name, region, seed].
      */
@@ -104,10 +104,9 @@ public class InsertTeams {
     }
 
     /**
-     * UPDATED: Inserts or updates each team in the 'teams' table with abbreviation, team_name, region, and seed.
+     * Inserts or updates each team in the 'teams' table with abbreviation, team_name, region, and seed.
      */
     private static void insertOrUpdateTeams(Set<String> uniqueTeams, Map<String, String[]> teamMapping) {
-        // UPDATED: SQL query now includes region and seed columns and updates them on duplicate key.
         String upsertQuery = "INSERT INTO teams (abbreviation, team_name, region, seed) VALUES (?, ?, ?, ?) " +
                              "ON DUPLICATE KEY UPDATE team_name = VALUES(team_name), region = VALUES(region), seed = VALUES(seed)";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
