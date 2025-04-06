@@ -19,7 +19,10 @@ CREATE TABLE users (
 CREATE TABLE teams (
     team_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each team.
     team_name VARCHAR(100) NOT NULL,        -- Full team name (e.g., "Duke Blue Devils").
-    abbreviation VARCHAR(10) NOT NULL       -- Short name (e.g., "DUKE").
+    abbreviation VARCHAR(10) NOT NULL,      -- Short name (e.g., "DUKE").
+    region VARCHAR(50) NOT NULL,            -- The region of the team (e.g., "East", "West").
+    seed INT NOT NULL,                      -- The team's seed.
+    UNIQUE KEY unique_abbreviation (abbreviation)  
 );
 
 /*
