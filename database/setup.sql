@@ -31,8 +31,10 @@ CREATE TABLE games (
     team1_id INT,                           -- First team in the matchup.
     team2_id INT,                           -- Second team in the matchup.
     game_time DATETIME NOT NULL,            -- When the game is scheduled.
-    team1_odds DECIMAL(5,2),                -- Betting odds for Team 1.
-    team2_odds DECIMAL(5,2),                -- Betting odds for Team 2.
+    team1_score INT,                        -- Score for team 1 (inserted by InsertGames).
+    team2_score INT,                        -- Score for team 2 (inserted by InsertGames).
+    team1_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 1 (optional).
+    team2_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 2 (optional).
     FOREIGN KEY (team1_id) REFERENCES teams(team_id),
     FOREIGN KEY (team2_id) REFERENCES teams(team_id)
 );
