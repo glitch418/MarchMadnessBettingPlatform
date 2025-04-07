@@ -3,6 +3,11 @@ WORKDIR /app
 
 # Copy Java source code
 COPY BackendMain.java .
+COPY database/ ./database/
+
+# Copy the CSV files from the 2024_game_results subdirectory
+COPY 2024_game_results/march_madness_mens_games_2024.csv ./
+COPY 2024_game_results/teams_mapping.csv ./
 
 # Install required dependencies
 RUN apt-get update && apt-get install -y wget curl
@@ -11,7 +16,13 @@ RUN apt-get update && apt-get install -y wget curl
 RUN wget -O mysql-connector-java-8.3.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.3.0/mysql-connector-j-8.3.0.jar
 
 # Compile Java program
-RUN javac -cp ".:mysql-connector-java-8.3.0.jar" BackendMain.java
+RUN javac -cp ".:mysql-connector-java-8.3.0.jar" BackendMain.java database/InsertTeams.java database/InsertGames.java
 
-# Run backend server
-CMD ["java", "-cp", ".:mysql-connector-java-8.3.0.jar", "BackendMain"]
+# Wait for MySQL to be ready, run the prefill scripts, then start the backend server
+CMD sh -c "echo 'Waiting for MySQL to be ready...'; sleep 20; \
+echo 'Running InsertTeams prefill...'; \
+java -cp '.:mysql-connector-java-8.3.0.jar' database.InsertTeams; \
+echo 'Running InsertGames prefill...'; \
+java -cp '.:mysql-connector-java-8.3.0.jar' database.InsertGames; \
+echo 'Starting backend HTTP server...'; \
+java -cp '.:mysql-connector-java-8.3.0.jar' BackendMain"

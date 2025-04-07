@@ -1,7 +1,7 @@
 import React from 'react';
 import "./Bracket.css";
 import { useState } from 'react';
-//import placeholderTeamIcon from "../../assets/placeholderTeamIcon.png";
+import teamImageMap from '../../utils/teamImageMap';
 
 const Bracket = ({ 
   team1 = null,
@@ -25,28 +25,22 @@ const Bracket = ({
       team2Winner = team2.score > team1.score;
   }
 
-  const imgT1 = `${team1.name}.png`;
-  const imgT2 = `${team2.name}.png`;
+  //const imgT1 = `/Team_Logos/${team1.name.replaceAll(" ", "_")}.png`;
+  //const imgT2 = `/Team_Logos/${team2.name.replaceAll(" ", "_")}.png`;
 
   const renderTeamContent = (team) => {
-    const isTeam1 = team.name === team1.name;
-    const imgSrc = isTeam1 ? imgT1 : imgT2;
-  
-    const [src, setSrc] = useState(imgSrc);
-    const [imgExists, setImgExists] = useState(true);
+    const imgSrc = teamImageMap[team.name];
+    const showImage = !!imgSrc;
   
     return (
       <div className={'team-content'}>
-        {imgExists && (
-          <img
-            src={src}
-            alt={`${team.name} logo`}
-            className={`logo${reverse ? '-reverse' : ''}`}
-            onError={() => {
-              setImgExists(false); // setSrc(placeholderTeamIcon)
-            }}
-          />
-        )}
+        {showImage && (
+        <img
+          src={imgSrc}
+          alt={`${team.name} logo`}
+          className={`logo${reverse ? '-reverse' : ''}`}
+        />
+      )}
         <div className={`seed${reverse ? '-reverse' : ''}`}>{team.seed}</div>
         <div className={`name${reverse ? '-reverse' : ''}`}>{team.name}</div>
         <div className={`score${reverse ? '-reverse' : ''}`}>{team.score}</div>
