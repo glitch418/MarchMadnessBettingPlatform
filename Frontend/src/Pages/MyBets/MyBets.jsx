@@ -4,10 +4,13 @@ import { Navigate } from "react-router-dom";
 import "./MyBets.css";
 
 const MyBets = () => {
-   const { isLoggedIn} = useLoginStatus();
+   const {isLoggedIn, userEmail} = useLoginStatus();
   
   if (!isLoggedIn) {
-    return <Navigate to="/login" />;
+    return (
+    <div>
+      <h1>Login to see your bets</h1>
+    </div>)
   }
   
   return (

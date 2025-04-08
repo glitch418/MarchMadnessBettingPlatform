@@ -8,7 +8,7 @@ const LoginStatusContext = createContext({
 });
 
 export const LoginStatusProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState(null);
 
   const login = (email) => {
