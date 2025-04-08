@@ -32,7 +32,7 @@ const Login = () => {
       const parts = result.trim().split(/\s+/);
       console.log("Parsed result array:", parts);
 
-      const returnedEmail = parts[1];
+      const returnedEmail = parts[2];
 
       if (returnedEmail === email) {
         login(email);
