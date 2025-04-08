@@ -1,87 +1,106 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLoginStatus } from "../../contexts/LoginStatusContext";
 import "./Login.css";
 
-// Import the backend query function using HTTP
-// Import the backend query function using HTTP
-import { queryBackend } from '../../utils/api';
-import { backendLogin } from '../../utils/api';
-import { backendSignUp } from '../../utils/api';
-
+import { queryBackend, backendLogin, backendSignUp } from '../../utils/api';
 
 const Login = () => {
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [queryInput, setQueryInput] = useState('');
-      const [queryResult, setQueryResult] = useState('');
-    const navigate = useNavigate();
+  // TODO: forgot password shouldnt take handleSubmit as its onClick method
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [queryInput, setQueryInput] = useState('');
+  const [queryResult, setQueryResult] = useState('');
+  const navigate = useNavigate();
+  const { login, isLoggedIn } = useLoginStatus();
 
-    // Function to handle form submission
-    function handleSubmit(e) {
-      
-      e.preventDefault();
-      console.log("called...");
-      
-      //checks if email and password matches an entry in the database
-      if (handleLogin()){
-          console.log("Login successful");
-          navigate("/");
-      }
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submitting login request");
 
-
-    // Function to handle backend query using HTTP
-    const handleQuery = async (query) => {
-      console.log("running...");
-      if (!query.trim()) {
-        alert('Please enter a valid query.');
-        return;
-      }
-      
-      try {
-        console.log("running...");
-          const result = await queryBackend(query); // Send custom query via HTTP
-          console.log(result);
-          setQueryResult(result); 
-          return result;// Display results
-      } catch (error) {
-        console.error('Query failed:', error);
-        setQueryResult('Error executing query.');
-      }
-    };
-
-    // sends email and password for account creation to backend
-    function handleCreateAccount() {
-      backendSignUp(email, password)
+    if (isLoggedIn) {
+      alert("You are already logged in.");
+      return;
     }
 
-    // sends email and password to backend for verification
-    function handleLogin() {
-      let x = backendLogin(email, password);
-      console.log(x);
-      return x;
+    try {
+      const result = await backendLogin(email, password);
+      console.log("Result from backendLogin:", result);
+      console.log("Type of result:", typeof result);
+
+      const parts = result.trim().split(/\s+/);
+      console.log("Parsed result array:", parts);
+
+      const returnedEmail = parts[2];
+
+      if (returnedEmail === email) {
+        login(email);
+        console.log("Login successful");
+        navigate("/");
+      } else {
+        alert("Login failed. Please check your email and password.");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Something went wrong during login.");
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    try {
+      await backendSignUp(email, password);
+      alert("Account created! You can now sign in.");
+    } catch (error) {
+      console.error("Account creation failed:", error);
+      alert("Failed to create account.");
+    }
+  };
+
+  const handleQuery = async (query) => {
+    if (!query.trim()) {
+      alert('Please enter a valid query.');
+      return;
     }
 
+    try {
+      const result = await queryBackend(query);
+      setQueryResult(result);
+    } catch (error) {
+      console.error('Query failed:', error);
+      setQueryResult('Error executing query.');
+    }
+  };
 
-    return (
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input 
+          placeholder="example@email.com" 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input 
+          type={showPassword ? "text" : "password"} 
+          placeholder="password" 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <div>
-            {/*TODO: update handle submit */}
-            <form onSubmit={handleSubmit}>
-                <input placeholder="example@email.com" onChange={(e) => {setEmail(e.target.value);}}/>
-                <input type={showPassword ? "text" : "password"} placeholder="password" onChange={(e) => {setPassword(e.target.value);}}/>
-                <div><input onChange={() => setShowPassword(!showPassword)} type="checkbox"/> <p> Show Password</p></div>  
-                <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
-            </form>
+          <input 
+            type="checkbox" 
+            checked={showPassword} 
+            onChange={() => setShowPassword(!showPassword)} 
+          />
+          <p>Show Password</p>
+        </div>  
+        <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+      </form>
 
-            {/*TODO: handle create account */}
-            <button onClick={handleCreateAccount} type="button">Create Account</button>
+      <button onClick={handleCreateAccount} type="button">Create Account</button>
+      <button type="button" onClick={handleSubmit}>Forgot Password?</button>
+    </div>
+  );
+};
 
-            {/*TODO: handle forgot password */}
-            <button type="button" onClick={handleSubmit}>Forgot Password?</button>
-        </div>
-    )
-}
-  
-  export default Login;
+export default Login;
