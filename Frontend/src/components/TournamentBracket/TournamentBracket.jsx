@@ -171,7 +171,7 @@ const TournamentBracket = (props) => {
         <div>
             {/* Round Headers */}
             
-            <div className="round-headers" style={{ display: "flex", position: "absolute", top: 80, width: "100%", left: 0}}>
+            <div className="round-headers" style={{ display: "flex", position: "absolute", width: "100%", left: 0, marginTop: '1vh'}}>
                 {[
                     { name: "First Round", date: "3/20-3/21"},
                     { name: "Second Round", date: "3/22-3/23"},
@@ -199,7 +199,7 @@ const TournamentBracket = (props) => {
                 ))}
             </div>
 
-            <div className="tournament-bracket-container" style={{ position: "relative", width: svgWidth, height: svgHeight, top: 80}}>
+            <div className="tournament-bracket-container" style={{ position: "relative", width: svgWidth, height: svgHeight, top: '8vh'}}>
                 {/* Render brackets with appropriate configurations */}
                 {['South', 'East', 'West', 'Midwest'].map((region) => (
                     ['first', 'second', 'sweet16', 'elite8'].map((round) => (
@@ -358,7 +358,7 @@ const TournamentBracket = (props) => {
                     top: bracketWidth/2
                 }}
             >
-                <img src={finalFourLogo} alt="Final Four Logo" width={150}/>
+                <img src={finalFourLogo} alt="Final Four Logo" width={svgWidth/10}/>
 
                 <div style={{ position: "relative", top: 0, display: 'flex', gap: 2 * hSp1}}>
                     <Bracket

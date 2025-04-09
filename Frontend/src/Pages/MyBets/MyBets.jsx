@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 import "./MyBets.css";
 
 const MyBets = () => {
-   const {isLoggedIn, userEmail} = useLoginStatus();
+  const {isLoggedIn, userEmail} = useLoginStatus();
   
   if (!isLoggedIn) {
     return (

@@ -2,10 +2,11 @@ nav {
     /* Navbar Color */
     background-color: black;
     /* Padding helps to increase/decrease size too */
-    padding: 10px 20px;
+    padding: 0 1vw;
     /* Contents placed in row (horizontally) */
     display: flex;
     align-items: center;
+    justify-content: space-between;
     /* Navbar is unscrollable */
     position: fixed;
     /* Position is top left */
@@ -13,43 +14,72 @@ nav {
     left: 0;
     /* Full Width */
     width: 100%;
-    /* Occupy small space of screen vertically */
-    height: 60px;
+    box-sizing: border-box;
+    /* Dont hardcode height, choose a reasonable size */
+    height: 8vh;
     /* Appear above all other elements */
     z-index: 1000;
     /* Gap between elements */
-    gap: 175px;
-  }
+    gap: 10vw;
+}
 
 /* Main container */
 .container {
     display: flex;
-    gap: 20px;
+    gap: 2vw;
+    flex: 1;
 }
 
 /* Flexbox to align icon and text */
 .nav-item {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    gap: 0.5vw;
     cursor: pointer;
     color: white;
-    font-size: 16px;
+    font-size: 1.25vw;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.nav-item:hover {
+    opacity: 0.8;
+}
+
+/* Align text in the center properly */
+.nav-item p {
+    padding-top: 0.5vh;
+}
+
+/* Scale icons with viewport */
+.nav-item img {
+    width: 2.5vw;
+    height: 2.5vw;
 }
 
 /* Search bar */
 .search-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.5vw;
+    flex: 2;
+}
+
+.search-container :hover{
+    opacity: 0.8;
+}
+
+#search-icon {
+    width: 2.5vw;
+    height: 2.5vw;
 }
 
 #search-bar {
-    padding: 8px;
+    padding: 0.5vw;
     border-radius: 5px;
     border: none;
     outline: none;
-    width: 700px;
+    width: 100%;
+    font-size: 1vw;
 }
 
 /*  To find hexcode of corresponding colors, visit: https://htmlcolorcodes.com/colors/
