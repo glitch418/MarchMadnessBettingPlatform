@@ -9,7 +9,7 @@ const Home = () => {
     return (
      <div>
          <Navbar/>
-         <div style={{paddingTop: '80px', display: 'flex', justifyContent: 'center'}}>
+         <div style={{paddingTop: '8vh', display: 'flex', justifyContent: 'center'}}>
             {/* ENABLE/DISABLE query box by commenting out: */}
             {/* <Query/> */}
             <div>
