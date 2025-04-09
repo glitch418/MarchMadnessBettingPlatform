@@ -5,17 +5,18 @@ import home from "../../assets/home.png";
 import bet from "../../assets/bet.png";
 import search from "../../assets/search.png";
 import profile from "../../assets/profile.png";
+import { useLoginStatus } from "../../contexts/LoginStatusContext";
 
 const Navbar = () => {
     const navigate = useNavigate();
     const [searchInput, setSearchInput] = useState("");
+    const {isLoggedIn, userEmail} = useLoginStatus();
 
     // Handle navigation
     const handleHomeClick = () => {
         navigate('/');
     };
 
-    // TODO: My bets maybe conditionally rendered based on login status
     const handleBetsClick = () => {
         navigate('/myBets');
     };
@@ -84,7 +85,9 @@ const Navbar = () => {
             */}
             <div className="nav-item" onClick={handleLoginClick}>
                 <img id="profile-icon" src={profile} alt="Profile" width={35} height={35}/>
-                <p>Login</p>
+
+                {/* Display first letter of email if logged in */}
+                <p>{isLoggedIn ? userEmail.charAt(0).toUpperCase() : 'Login'}</p>
             </div>
 
         </nav>
