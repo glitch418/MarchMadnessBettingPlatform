@@ -41,6 +41,10 @@ nav {
     font-weight: bold;
 }
 
+.nav-item:hover {
+    opacity: 0.8;
+}
+
 /* Align text in the center properly */
 .nav-item p {
     padding-top: 0.5vh;
@@ -58,6 +62,10 @@ nav {
     align-items: center;
     gap: 0.5vw;
     flex: 2;
+}
+
+.search-container :hover{
+    opacity: 0.8;
 }
 
 #search-icon {
