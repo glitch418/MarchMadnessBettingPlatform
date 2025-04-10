@@ -69,8 +69,34 @@ public class InsertGames {
                     // System.out.println("Row " + rowCount + ": Team lookup: " + team1 + " -> " + team1_id +
                     //                    ", " + team2 + " -> " + team2_id);
                     
+
+                    // Check which team is favored. Set the id of the team to be associated with whichever team is favored.
+                    // Then pull in the spread and moneyline for both teams.
+                    // Check from the CSV which of the teams is supposed to be favored by team num in the matchup
+                    int team_favored_num = Integer.parseInt(values[9].trim());
+                    int team_dog_num = Integer.parseInt(values[12].trim());
+                    // Create variables to hold each necessary piece of betting information for both teams, by underdog or favorite
+                    int team_favored_id = -1;
+                    int team_dog_id = -1;
+                    if (team_favored_num == 1){
+                        team_favored_id = team1_id;
+                        team_dog_id = team2_id;
+                    } else if (team_dog_num == 1){
+                        team_favored_id = team2_id;
+                        team_dog_id = team1_id;
+                    }
+                    int team_favored_spread = 0;
+                    int team_favored_moneyline = 0;
+                    int team_dog_spread = 0;
+                    int team_dog_moneyline = 0;
+                    team_favored_spread = Integer.parseInt(values[10].trim());
+                    team_favored_moneyline = Integer.parseInt(values[11].trim());
+                    team_dog_spread = Integer.parseInt(values[13].trim());
+                    team_dog_moneyline = Integer.parseInt(values[14].trim()); 
+
+
                     if (team1_id != -1 && team2_id != -1) {
-                        insertGame(team1_id, team2_id, team1_score, team2_score, mysqlDate, round);
+                        insertGame(team1_id, team2_id, team1_score, team2_score, mysqlDate, round, team_favored_id, team_dog_id, team_favored_spread, team_dog_spread, team_favored_moneyline, team_dog_moneyline);
                     } else {
                         System.out.println("Row " + rowCount + ": Skipping game. Could not find IDs for " 
                             + team1 + " or " + team2);
@@ -118,16 +144,22 @@ public class InsertGames {
     /**
      * Inserts a row into the games table.
      *
-     * @param team1_id    The unique ID of the first team.
-     * @param team2_id    The unique ID of the second team.
-     * @param team1_score The final score of the first team.
-     * @param team2_score The final score of the second team.
-     * @param game_date   The date of the game in "yyyy-MM-dd" format.
-     * @param round       The round identifier (e.g., 1 = Round of 64, 2 = Round of 32, etc.).  // ADDED documentation
+     * @param team1_id                The unique ID of the first team.
+     * @param team2_id                The unique ID of the second team.
+     * @param team1_score             The final score of the first team.
+     * @param team2_score             The final score of the second team.
+     * @param game_date               The date of the game in "yyyy-MM-dd" format.
+     * @param round                   The round identifier (e.g., 1 = Round of 64, 2 = Round of 32, etc.).  // ADDED documentation
+     * @param team_favored_id         The id of the favored team
+     * @param team_dog_id             The id of the underdog team
+     * @param team_favored_spread     The spread for the favorite
+     * @param team_dog_spread         The spread for the dog
+     * @param team_favored_moneyline  The moneyline for the favorite
+     * @param team_dog_moneyline      The moneyline for the dog
      */
-    public static void insertGame(int team1_id, int team2_id, int team1_score, int team2_score, String game_date, int round) {
-        String insertQuery = "INSERT INTO games (team1_id, team2_id, team1_score, team2_score, game_time, round) "
-                           + "VALUES (?, ?, ?, ?, ?, ?)";
+    public static void insertGame(int team1_id, int team2_id, int team1_score, int team2_score, String game_date, int round, int team_favored_id, int team_dog_id, int team_favored_spread, int team_dog_spread, int team_favored_moneyline, int team_dog_moneyline) {
+        String insertQuery = "INSERT INTO games (team1_id, team2_id, team1_score, team2_score, game_time, round, team_favored_id, team_dog_id, favored_spread, dog_spread, favored_moneyline, dog_moneyline) "
+                           + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
             pstmt.setInt(1, team1_id);
@@ -135,7 +167,13 @@ public class InsertGames {
             pstmt.setInt(3, team1_score);
             pstmt.setInt(4, team2_score);
             pstmt.setString(5, game_date);
-            pstmt.setInt(6, round); 
+            pstmt.setInt(6, round);
+            pstmt.setInt(7, team_favored_id);
+            pstmt.setInt(8, team_dog_id);
+            pstmt.setInt(9, team_favored_spread);
+            pstmt.setInt(10, team_dog_spread);
+            pstmt.setInt(11, team_favored_moneyline);
+            pstmt.setInt(12, team_dog_moneyline);  
             pstmt.executeUpdate();
             // DEBUG: Print confirmation of insertion
             // System.out.println("Inserted game: " + team1_id + " vs. " + team2_id + " on " + game_date + " (Round " + round + ")");

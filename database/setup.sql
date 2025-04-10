@@ -34,13 +34,19 @@ CREATE TABLE games (
     team1_id INT,                           -- First team in the matchup.
     team2_id INT,                           -- Second team in the matchup.
     game_time DATETIME NOT NULL,            -- When the game is scheduled.
-    team1_score INT,                        -- Score for team 1 (inserted by InsertGames).
-    team2_score INT,                        -- Score for team 2 (inserted by InsertGames).
-    team1_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 1 (optional).
-    team2_odds DECIMAL(5,2) DEFAULT NULL,   -- Betting odds for team 2 (optional).
+    team1_score INT DEFAULT 0,              -- Team 1 score, 0 if unstarted (insertGames)
+    team2_score INT DEFAULT 0,              -- Team 2 score, 0 if unstarted (insertGames)
     round INT,                              -- New column for round (e.g., 0 = First Four, 1 = Round of 64, 2 = Round of 32, etc.)
+    team_favored_id INT,                    -- The team favored to win the match(team1 or team2).
+    team_dog_id INT,                        -- The team favored to lose the match(team1 or team2).
+    favored_spread INT,                     -- The spread for the team favored to win
+    dog_spread INT,                         -- The spread for the team favored to lose
+    favored_moneyline INT,                  -- The moneyline odds for the team favored to win
+    dog_moneyline INT,                      -- The moneyline odds for the team favored to lose
     FOREIGN KEY (team1_id) REFERENCES teams(team_id),
-    FOREIGN KEY (team2_id) REFERENCES teams(team_id)
+    FOREIGN KEY (team2_id) REFERENCES teams(team_id),
+    FOREIGN KEY (team_favored_id) REFERENCES teams(team_id),
+    FOREIGN KEY (team_dog_id) REFERENCES teams(team_id)
 );
 
 /*
