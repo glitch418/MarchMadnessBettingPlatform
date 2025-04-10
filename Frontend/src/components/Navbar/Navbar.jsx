@@ -6,12 +6,12 @@ import bet from "../../assets/bet.png";
 import search from "../../assets/search.png";
 import profile from "../../assets/profile.png";
 import placeBet from "../../assets/placebet.png";
-import { useLoginStatus } from "../../contexts/LoginStatusContext";
+import { useUserSession } from "../../contexts/UserSessionContext";
 
 const Navbar = () => {
     const navigate = useNavigate();
     const [searchInput, setSearchInput] = useState("");
-    const { isLoggedIn, userEmail } = useLoginStatus();
+    const { isLoggedIn, userEmail } = useUserSession();
 
     const handleHomeClick = () => {
         navigate('/');

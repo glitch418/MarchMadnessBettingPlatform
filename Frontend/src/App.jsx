@@ -4,12 +4,12 @@ import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import MyBets from './Pages/MyBets/MyBets';
 import PlaceBet from './Pages/PlaceBet/PlaceBet';
-import { LoginStatusProvider } from './contexts/LoginStatusContext';
+import UserSessionProvider from './contexts/UserSessionContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
   return (
-      <LoginStatusProvider>
+      <UserSessionProvider>
         <Router> {/* Provides routing context */}
           <Routes> {/* Container that matches routes */}
 
@@ -32,7 +32,7 @@ const App = () => {
             <Route path="*" element={<Home/>} />
           </Routes>
         </Router>
-      </LoginStatusProvider>
+      </UserSessionProvider>
   );
 };
 

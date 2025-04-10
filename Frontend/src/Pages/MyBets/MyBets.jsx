@@ -1,10 +1,9 @@
 import React from "react";
-import { useLoginStatus } from "../../contexts/LoginStatusContext";
-import { Navigate } from "react-router-dom";
+import { useUserSession } from "../../contexts/UserSessionContext";
 import "./MyBets.css";
 
 const MyBets = () => {
-  const {isLoggedIn, userEmail} = useLoginStatus();
+  const {isLoggedIn, userEmail} = useUserSession();
   
   if (!isLoggedIn) {
     return (

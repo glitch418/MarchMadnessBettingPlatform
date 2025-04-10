@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLoginStatus } from "../../contexts/LoginStatusContext";
+import { useUserSession } from "../../contexts/UserSessionContext";
 import "./Login.css";
 
 import { queryBackend, backendLogin, backendSignUp } from '../../utils/api';
@@ -13,7 +13,7 @@ const Login = () => {
   const [queryInput, setQueryInput] = useState('');
   const [queryResult, setQueryResult] = useState('');
   const navigate = useNavigate();
-  const { login, isLoggedIn } = useLoginStatus();
+  const { login, isLoggedIn } = useUserSession();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +24,9 @@ const Login = () => {
       return;
     }
 
+    let returnedEmail = null;
+    let balance = 0;
+
     try {
       const result = await backendLogin(email, password);
       console.log("Result from backendLogin:", result);
@@ -32,15 +35,20 @@ const Login = () => {
       const parts = result.trim().split(/\s+/);
       console.log("Parsed result array:", parts);
 
-      const returnedEmail = parts[2];
+      if (parts.length === 5) {
+        returnedEmail = parts[2];
+        balance = parseFloat(parts[4]);
+      }
 
       if (returnedEmail === email) {
-        login(email);
+        login(email, balance);
         console.log("Login successful");
         navigate("/");
-      } else {
+      } 
+      else {
         alert("Login failed. Please check your email and password.");
       }
+
     } catch (error) {
       console.error("Login failed:", error);
       alert("Something went wrong during login.");
@@ -98,7 +106,7 @@ const Login = () => {
       </form>
 
       <button onClick={handleCreateAccount} type="button">Create Account</button>
-      <button type="button" onClick={handleSubmit}>Forgot Password?</button>
+      <button type="button" onClick={() => alert('Forgot password is not functional yet.')}>Forgot Password?</button>
     </div>
   );
 };
