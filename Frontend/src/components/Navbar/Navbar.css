@@ -47,7 +47,7 @@ nav {
 
 /* Align text in the center properly */
 .nav-item p {
-    padding-top: 0.5vh;
+    padding-top: 1vh;
 }
 
 /* Scale icons with viewport */
@@ -100,7 +100,7 @@ nav {
 }
 
 .balance-item p {
-    padding-top: 0.5vh;
+    padding-top: 1vh;
 }
 
 /* Scale icons with viewport */
