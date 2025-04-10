@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { getGames, placeBet } from '../../utils/api';
+import { fetchGames, placeBet } from '../../utils/api';
 
-const MyBets = () => {
+const PlaceBet = () => {
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState('');
   const [amount, setAmount] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      const gameList = await getGames();
-      setGames(gameList);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const gameList = await fetchGames();
+        setGames(Array.isArray(gameList) ? gameList : []);
+      } catch (error) {
+        console.error('Error fetching games:', error);
+        showToastMessage('Failed to fetch games from the server.');
+      }
+      setLoading(false);
     };
-    fetchGames();
+    fetchData();
   }, []);
 
-  const handlePlaceBet = async () => {
-    // TODO: Validate and send to backend
+  const handlePlaceBet = () => {
     if (!selectedGame || !amount) {
       showToastMessage('Please select a game and enter an amount.');
       return;
@@ -28,9 +35,16 @@ const MyBets = () => {
 
   const confirmBet = async () => {
     setShowModal(false);
-    const response = await placeBet(selectedGame, amount);
-    showToastMessage('Bet placed successfully!');
-    console.log(response);
+    try {
+      const response = await placeBet(selectedGame, parseFloat(amount));
+      showToastMessage('Bet placed successfully!');
+      setSelectedGame('');
+      setAmount('');
+      console.log(response);
+    } catch (error) {
+      console.error('Bet placement failed:', error);
+      showToastMessage('Bet failed. Please try again.');
+    }
   };
 
   const showToastMessage = (message) => {
@@ -39,21 +53,21 @@ const MyBets = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  if (loading) return <div>Loading...</div>;
+
   return (
     <div>
       <h2>Place a New Bet</h2>
 
-      {/* Game Selection */}
       <select value={selectedGame} onChange={(e) => setSelectedGame(e.target.value)}>
         <option value="">Select a game</option>
         {games.map((game) => (
           <option key={game.game_id} value={game.game_id}>
-            {game.team1_id} vs {game.team2_id} {/* Placeholder for names */}
+            {game.team1_name} vs {game.team2_name}
           </option>
         ))}
       </select>
 
-      {/* Amount Input */}
       <input
         type="number"
         placeholder="Enter bet amount"
@@ -61,10 +75,8 @@ const MyBets = () => {
         onChange={(e) => setAmount(e.target.value)}
       />
 
-      {/* Submit */}
       <button onClick={handlePlaceBet}>Place Bet</button>
 
-      {/* Confirmation Modal */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -75,21 +87,18 @@ const MyBets = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div style={styles.toast}>
-          {toastMessage}
-        </div>
-      )}
+      {showToast && <div style={styles.toast}>{toastMessage}</div>}
     </div>
   );
 };
 
-// Inline styles for simplicity
 const styles = {
   modalOverlay: {
     position: 'fixed',
-    top: 0, left: 0, right: 0, bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     display: 'flex',
     justifyContent: 'center',
@@ -114,4 +123,4 @@ const styles = {
   },
 };
 
-export default MyBets;
+export default PlaceBet;

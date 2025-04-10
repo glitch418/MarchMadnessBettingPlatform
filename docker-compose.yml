@@ -31,7 +31,7 @@ services:
       context: .  # BackendMain.java is in the root directory
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"  # Port for TCP communication with the frontend
+      - "5001:5001"  # Port for HTTP communication with the frontend
     depends_on:
       - db
     networks:

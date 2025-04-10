@@ -1,98 +1,106 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLoginStatus } from "../../contexts/LoginStatusContext";
 import "./Login.css";
-import Navbar from "../../components/Navbar/Navbar";
+
+import { queryBackend, backendLogin, backendSignUp } from '../../utils/api';
 
 const Login = () => {
-    // States to manage user input
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+  // TODO: forgot password shouldnt take handleSubmit as its onClick method
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [queryInput, setQueryInput] = useState('');
+  const [queryResult, setQueryResult] = useState('');
+  const navigate = useNavigate();
+  const { login, isLoggedIn } = useLoginStatus();
 
-    // Enable routing
-    const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submitting login request");
 
-    // On sign in
-    function handleSubmit(e) {
-        e.preventDefault();
-        
-        //TODO: check credentials
-        if (true){
-            navigate("/");
-        }
+    if (isLoggedIn) {
+      alert("You are already logged in.");
+      return;
     }
 
-    // On create account
-    function handleCreateAccount(e) {
-        navigate("/signup");
+    try {
+      const result = await backendLogin(email, password);
+      console.log("Result from backendLogin:", result);
+      console.log("Type of result:", typeof result);
+
+      const parts = result.trim().split(/\s+/);
+      console.log("Parsed result array:", parts);
+
+      const returnedEmail = parts[2];
+
+      if (returnedEmail === email) {
+        login(email);
+        console.log("Login successful");
+        navigate("/");
+      } else {
+        alert("Login failed. Please check your email and password.");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Something went wrong during login.");
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    try {
+      await backendSignUp(email, password);
+      alert("Account created! You can now sign in.");
+    } catch (error) {
+      console.error("Account creation failed:", error);
+      alert("Failed to create account.");
+    }
+  };
+
+  const handleQuery = async (query) => {
+    if (!query.trim()) {
+      alert('Please enter a valid query.');
+      return;
     }
 
-    return (
-        <div className="login-container">
-            <div className="login-form">
-                <div className="login-header">
-                    <h1>Sign In</h1>
-                </div>
-                
-                {/*TODO: update handle submit */}
-                <form onSubmit={handleSubmit}>
-                    <div className="input">
-                        <input 
-                            type="email"
-                            placeholder="johndoe@email.com" 
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="input">
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            placeholder="password" 
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="checkbox">
-                        <input 
-                            id="show-password"
-                            onChange={() => setShowPassword(!showPassword)} 
-                            type="checkbox"
-                        /> 
-                        <p>Show Password</p>
-                    </div>  
-                    
-                    <button 
-                        className="submit" 
-                        type="submit" 
-                        disabled={!email.trim() || !password.trim()}
-                    >
-                        Sign in
-                    </button>
-                </form>
+    try {
+      const result = await queryBackend(query);
+      setQueryResult(result);
+    } catch (error) {
+      console.error('Query failed:', error);
+      setQueryResult('Error executing query.');
+    }
+  };
 
-                <div className="actions">
-                    {/*TODO: handle create account */}
-                    <button 
-                        className="create-account-btn"
-                        onClick={handleCreateAccount} 
-                        type="button"
-                    >
-                        Create Account
-                    </button>
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input 
+          placeholder="example@email.com" 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input 
+          type={showPassword ? "text" : "password"} 
+          placeholder="password" 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <div>
+          <input 
+            type="checkbox" 
+            checked={showPassword} 
+            onChange={() => setShowPassword(!showPassword)} 
+          />
+          <p>Show Password</p>
+        </div>  
+        <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+      </form>
 
-                    {/*TODO: handle forgot password */}
-                    <button 
-                        className="forgot-password-btn" 
-                        type="button" 
-                        onClick={() => (null)}
-                    >
-                        Forgot Password?
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+      <button onClick={handleCreateAccount} type="button">Create Account</button>
+      <button type="button" onClick={handleSubmit}>Forgot Password?</button>
+    </div>
+  );
 };
-  
+
 export default Login;

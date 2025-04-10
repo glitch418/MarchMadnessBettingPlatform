@@ -1,100 +1,79 @@
-// Import necessary classes for HTTP server functionality
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 
-// Import IO and networking classes
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-
-// Import SQL classes for database connection and queries
 import java.sql.*;
 
 public class GameDisplay {
-
-    // Entry point of the application
     public static void main(String[] args) throws IOException {
-        // Create an HTTP server listening on port 5001 with default backlog
-        HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
-
-        // Register the /games endpoint and assign a handler for it
+        HttpServer server = HttpServer.create(new InetSocketAddress(5002), 0);
         server.createContext("/games", new GameHandler());
-
-        // Use the default executor (creates a thread pool automatically)
         server.setExecutor(null);
-
-        // Start the server
         server.start();
-
-        // Print confirmation to console
-        System.out.println("Game Display Server running on port 5001...");
+        System.out.println("GameDisplay server running at http://localhost:5002/games");
     }
 
-    // Handler class for the /games route
     static class GameHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Check if the request method is GET
-            if ("GET".equals(exchange.getRequestMethod())) {
-                // Retrieve game data from the database
-                String response = getGames();
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
 
-                // Send HTTP 200 OK with the response length
-                exchange.sendResponseHeaders(200, response.length());
-
-                // Write the response to the response body
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } else {
-                // Reject non-GET requests with 405 Method Not Allowed
-                exchange.sendResponseHeaders(405, -1);
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1); // Method not allowed
+                return;
             }
+
+            String json = getGamesJson();
+            byte[] responseBytes = json.getBytes();
+
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseBytes);
+            os.close();
         }
     }
 
-    // Retrieves all games from the database and formats them as a JSON-like string
-    public static String getGames() {
-        // Use a StringBuilder to build the JSON-style response
-        StringBuilder result = new StringBuilder("[\n");
-
-        try (
-            // Connect to the MySQL database (in Docker container named 'db')
-            Connection dbCxn = DriverManager.getConnection(
+    public static String getGamesJson() {
+        StringBuilder result = new StringBuilder("[");
+        try (Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                     "SELECT g.game_id, g.game_time, g.team1_odds, g.team2_odds, " +
+                     "t1.name AS team1_name, t2.name AS team2_name " +
+                     "FROM games g " +
+                     "JOIN teams t1 ON g.team1_id = t1.team_id " +
+                     "JOIN teams t2 ON g.team2_id = t2.team_id")) {
 
-            // Create a statement object for executing SQL
-            Statement stmt = dbCxn.createStatement();
-
-            // Execute a SELECT query to retrieve all games
-            ResultSet rs = stmt.executeQuery("SELECT * FROM games")) {
-
-            // Iterate over each row in the result set
             while (rs.next()) {
-                // Append each game's data as a JSON object
-                result.append("  {\"game_id\": ").append(rs.getInt("game_id"))
-                      .append(", \"team1_id\": ").append(rs.getInt("team1_id"))
-                      .append(", \"team2_id\": ").append(rs.getInt("team2_id"))
-                      .append(", \"game_time\": \"").append(rs.getTimestamp("game_time"))
-                      .append("\", \"team1_odds\": ").append(rs.getBigDecimal("team1_odds"))
-                      .append(", \"team2_odds\": ").append(rs.getBigDecimal("team2_odds"))
-                      .append("},\n"); // Add comma after each object for formatting
+                result.append("{")
+                      .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
+                      .append("\"team1_name\":\"").append(escapeJson(rs.getString("team1_name"))).append("\",")
+                      .append("\"team2_name\":\"").append(escapeJson(rs.getString("team2_name"))).append("\",")
+                      .append("\"game_time\":\"").append(rs.getTimestamp("game_time")).append("\",")
+                      .append("\"team1_odds\":").append(rs.getBigDecimal("team1_odds")).append(",")
+                      .append("\"team2_odds\":").append(rs.getBigDecimal("team2_odds"))
+                      .append("},");
             }
+
+            if (result.length() > 1) {
+                result.setLength(result.length() - 1); // Remove trailing comma
+            }
+
+            result.append("]");
         } catch (SQLException e) {
-            // Return a JSON-style error message if SQL fails
-            return "{\"error\": \"SQL Error: " + e.getMessage() + "\"}";
+            return "{\"error\":\"Database error: " + escapeJson(e.getMessage()) + "\"}";
         }
-
-        // Remove the trailing comma and newline after the last game, if present
-        if (result.length() > 2) {
-            result.setLength(result.length() - 2);
-        }
-
-        // Close the JSON array
-        result.append("\n]");
-
-        // Return the final JSON-like string
         return result.toString();
+    }
+
+    // Escape double quotes and backslashes for safe JSON output
+    private static String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

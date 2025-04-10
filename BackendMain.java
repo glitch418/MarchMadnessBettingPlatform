@@ -16,147 +16,236 @@ import java.util.Scanner;
 
 public class BackendMain {
 
-    // Entry point of the program
     public static void main(String[] args) throws IOException {
-        // Start the HTTP server to handle requests from the frontend
         startHttpServer();
-
-        // Keep command-line query functionality for manual testing/debugging
-        runCommandLineQuery();
     }
 
-    // Method to start a simple HTTP server on port 5000
     public static void startHttpServer() throws IOException {
-        // Bind the server to port 5000 with a backlog of 0 (default)
-        HttpServer server = HttpServer.create(new InetSocketAddress(5000), 0);
-
-        // Register a context (route) for "/query" and assign a handler
+        HttpServer server = HttpServer.create(new InetSocketAddress(5001), 0);
         server.createContext("/query", new QueryHandler());
-
-        // Use default executor (null means a default thread pool will be used)
+        server.createContext("/login", new LoginHandler());
+        server.createContext("/signup", new SignUpHandler());
+        server.createContext("/games", new GameHandler());
+        server.createContext("/teams", new TeamHandler());
         server.setExecutor(null);
-
-        // Start the server
         server.start();
-
-        // Log that the server has started
-        System.out.println("HTTP server running on port 5000");
+        System.out.println("HTTP server running on port 5001");
     }
 
-    // Inner class that handles HTTP requests to "/query"
     static class QueryHandler implements HttpHandler {
-        // Method that handles incoming HTTP requests
         public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers to allow requests from any origin (frontend-friendly)
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
 
-            // Handle preflight OPTIONS requests used by browsers before sending real requests
             if ("OPTIONS".equals(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1); // 204 No Content, no response body
+                exchange.sendResponseHeaders(204, -1);
                 return;
             }
 
-            // Only allow GET requests to perform queries
             if ("GET".equals(exchange.getRequestMethod())) {
-                // Extract the query string from the URL (e.g., ?SELECT * FROM users)
                 String query = exchange.getRequestURI().getQuery();
-
-                // Execute the SQL query and get the result as a string
-                String response = executeQuery(query);
-
-                // Send response headers with status 200 and response length
+                String response = executeQuery(query.substring(2));
                 exchange.sendResponseHeaders(200, response.length());
-
-                // Send the actual response body
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
             } else {
-                // Reject any non-GET/OPTIONS request with 405 Method Not Allowed
                 exchange.sendResponseHeaders(405, -1);
             }
         }
     }
 
+    static class LoginHandler extends QueryHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
 
-    // Philip's Database Connection
-    public static void runCommandLineQuery() {
-        try {
-            Connection dbCxn = DriverManager.getConnection(
-                "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
-
-            String testQuery = receiveQuery();
-            System.out.println("Executing query: " + testQuery);
-
-            if (testQuery.toLowerCase().contains("select")) {
-                ResultSet rs = exeSelect(testQuery, dbCxn);
-                while (rs.next()) {
-                    ResultSetMetaData rsMeta = rs.getMetaData();
-                    for (int i = 1; i <= rsMeta.getColumnCount(); i++) {
-                        if (i > 1) System.out.print(",  ");
-                        String columnValue = rs.getString(i);
-                        System.out.print(columnValue + " " + rsMeta.getColumnName(i));
-                    }
-                    System.out.println();
-                }
-            } else if (testQuery.toLowerCase().contains("insert") || testQuery.toLowerCase().contains("update") || testQuery.toLowerCase().contains("delete")) {
-                exeUpdate(testQuery, dbCxn);
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
             }
 
-            dbCxn.close();
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                int qIndex = query.indexOf("email");
+                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
+                String password = query.substring(query.indexOf("pass") + 5);
 
-        } catch (Exception e) {
-            System.out.println("Command-line Query Error: " + e.getMessage());
+                String fQuery = "SELECT * FROM users WHERE email = '" + email + "' AND password_hash = '" + password + "'";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
+
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
         }
     }
 
-    public static ResultSet exeSelect(String query, Connection dbCxn) throws SQLException {
-        Statement stmt = dbCxn.createStatement();
-        return stmt.executeQuery(query);
+    static class SignUpHandler extends QueryHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                int qIndex = query.indexOf("email");
+                String email = query.substring(qIndex + 6, query.indexOf("&", qIndex));
+                String password = query.substring(query.indexOf("pass") + 5);
+                String fQuery = "INSERT INTO users (username, email, password_hash) VALUES ('" + email + "', '" + email + "', '" + password + "')";
+                System.out.println("email: " + email);
+                System.out.println("password: " + password);
+                String response = executeQuery(fQuery);
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
     }
 
-    public static void exeUpdate(String query, Connection dbCxn) throws SQLException {
-        Statement stmt = dbCxn.createStatement();
-        stmt.executeUpdate(query);
+    static class TeamHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+
+            String json = getTeamsJson();
+            byte[] responseBytes = json.getBytes();
+
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseBytes);
+            os.close();
+        }
     }
 
-    public static String receiveQuery() {
-        Scanner scan = new Scanner(System.in);
-        System.out.println("What would you like to query: ");
-        return scan.nextLine();
+    public static String getTeamsJson() {
+        StringBuilder result = new StringBuilder("[");
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM teams")) {
+
+            while (rs.next()) {
+                result.append("{")
+                        .append("\"team_id\":").append(rs.getInt("team_id")).append(",")
+                        .append("\"team_name\":\"").append(rs.getString("team_name")).append("\"")  // updated column name
+                        .append("},");
+            }
+
+            if (result.length() > 1) {
+                result.setLength(result.length() - 1); // Remove trailing comma
+            }
+
+            result.append("]");
+        } catch (SQLException e) {
+            return "{\"error\":\"Database error: " + e.getMessage() + "\"}";
+        }
+        return result.toString();
     }
 
-  // Execute SQL query and return the result as a formatted string (used by HTTP server)
+    static class GameHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+
+            String json = getGamesJson();
+            byte[] responseBytes = json.getBytes();
+
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseBytes);
+            os.close();
+        }
+    }
+
+    public static String getGamesJson() {
+        StringBuilder result = new StringBuilder("[");
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                "SELECT g.game_id, t1.team_name AS team1_name, t2.team_name AS team2_name " +  // updated column name
+                "FROM games g " +
+                "JOIN teams t1 ON g.team1_id = t1.team_id " +
+                "JOIN teams t2 ON g.team2_id = t2.team_id")) {
+
+            while (rs.next()) {
+                result.append("{")
+                        .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
+                        .append("\"team1_name\":\"").append(rs.getString("team1_name")).append("\",")
+                        .append("\"team2_name\":\"").append(rs.getString("team2_name")).append("\"")
+                        .append("},");
+            }
+
+            if (result.length() > 1) {
+                result.setLength(result.length() - 1); // Remove trailing comma
+            }
+
+            result.append("]");
+        } catch (SQLException e) {
+            return "{\"error\":\"Database error: " + e.getMessage() + "\"}";
+        }
+        return result.toString();
+    }
+
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
-        try (
-            // Establish connection to database
-            Connection dbCxn = DriverManager.getConnection(
+        try (Connection dbCxn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = dbCxn.createStatement()) {
 
-            // Create a statement object to run the query
-            Statement stmt = dbCxn.createStatement();
-
-            // Execute the query and get the results
-            ResultSet rs = stmt.executeQuery(query)) {
-
-            // Get metadata to determine column count and names
-            ResultSetMetaData metaData = rs.getMetaData();
-
-            // Process each row of the result set
-            while (rs.next()) {
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    // Append each column value followed by a space
-                    result.append(rs.getString(i)).append(" ");
-                }
-                result.append("\n"); // Newline after each row
+            ResultSet rs = null;
+            if (query.toLowerCase().contains("select")) {
+                rs = stmt.executeQuery(query);
+            } else if (query.toLowerCase().contains("insert") || query.toLowerCase().contains("update") || query.toLowerCase().contains("delete")) {
+                stmt.executeUpdate(query);
+                return "Update successful";
             }
+
+            if (rs != null) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                while (rs.next()) {
+                    for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                        result.append(rs.getString(i)).append(" ");
+                    }
+                    result.append("\n");
+                }
+            }
+
         } catch (SQLException e) {
-            // Return error message if SQL fails
-            return "SQL Error: " + e.getMessage();
+            return "SQL Error: " + query + " " + e.getMessage();
+        } catch (Exception e) {
+            return "Other Error: " + e.getMessage();
         }
-        return result.toString(); // Return formatted result
+        return result.toString();
     }
 }
