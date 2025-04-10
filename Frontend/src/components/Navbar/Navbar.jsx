@@ -11,7 +11,7 @@ import { useUserSession } from "../../contexts/UserSessionContext";
 const Navbar = () => {
     const navigate = useNavigate();
     const [searchInput, setSearchInput] = useState("");
-    const { isLoggedIn, userEmail } = useUserSession();
+    const { isLoggedIn, userEmail, balance } = useUserSession();
 
     const handleHomeClick = () => {
         navigate('/');
@@ -87,7 +87,7 @@ const Navbar = () => {
                 onClick={isLoggedIn ? handleProfileClick : handleLoginClick}
             >
                 <img id="profile-icon" src={profile} alt="Profile" />
-                <p>{isLoggedIn ? userEmail.charAt(0).toUpperCase() : 'Login'}</p>
+                <p>{isLoggedIn ? `${userEmail?.charAt(0).toUpperCase()}` : 'Login'}</p>
             </div>
         </nav>
     );
