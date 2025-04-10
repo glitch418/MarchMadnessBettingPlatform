@@ -45,8 +45,9 @@ export const UserSessionProvider = ({ children }) => {
 
   const updateBalance = (newBalance) => {
     setBalance(newBalance);
-    sessionStorage.setItem("balance", newBalance.toString());
     // add logic to update database here
+    // set session storage item with the value returned from the database
+    sessionStorage.setItem("balance", newBalance.toString());
   };
 
   return (
