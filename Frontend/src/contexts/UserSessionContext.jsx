@@ -13,7 +13,7 @@ export const UserSessionProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const loggedInStatus = sessionStorage.getItem("isLoggedIn");
     const userEmail = sessionStorage.getItem("userEmail");
-    return loggedInStatus === "true" && userEmail !== null
+    return loggedInStatus === "true" && userEmail !== null && userEmail !== '';
   });
 
   const [userEmail, setUserEmail] = useState(() => {
