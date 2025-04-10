@@ -11,7 +11,9 @@ const UserSessionContext = createContext({
 
 export const UserSessionProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return sessionStorage.getItem("isLoggedIn") === "true";
+    const loggedInStatus = sessionStorage.getItem("isLoggedIn");
+    const userEmail = sessionStorage.getItem("userEmail");
+    return loggedInStatus === "true" && userEmail !== null
   });
 
   const [userEmail, setUserEmail] = useState(() => {
