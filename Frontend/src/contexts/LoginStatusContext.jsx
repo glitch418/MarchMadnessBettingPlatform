@@ -8,17 +8,26 @@ const LoginStatusContext = createContext({
 });
 
 export const LoginStatusProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return sessionStorage.getItem("isLoggedIn") === "true";
+  });
+
+  const [userEmail, setUserEmail] = useState(() => {
+    return sessionStorage.getItem("userEmail");
+  });
 
   const login = (email) => {
     setIsLoggedIn(true);
     setUserEmail(email);
+    sessionStorage.setItem("isLoggedIn", "true");
+    sessionStorage.setItem("userEmail", email);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUserEmail(null);
+    sessionStorage.removeItem("isLoggedIn");
+    sessionStorage.removeItem("userEmail");
   };
 
   return (
@@ -31,5 +40,3 @@ export const LoginStatusProvider = ({ children }) => {
 export const useLoginStatus = () => {
   return useContext(LoginStatusContext);
 };
-
-export default LoginStatusContext;

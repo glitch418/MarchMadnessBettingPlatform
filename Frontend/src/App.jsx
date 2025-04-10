@@ -18,8 +18,6 @@ const App = () => {
 
             {/* Login Page */}
             <Route path="/login" element={<Login/>} />
-            {/* Sign up page */}
-            {/* <Route path="/signup" element={<SignUp/>} /> */}
 
             {/* TODO: Profile page */}
             {/* <Route path="/profile" element={<Profile/>} /> */}
