@@ -4,6 +4,7 @@ import Home from './Pages/Home/Home';
 import Login from './Pages/Login/Login';
 import MyBets from './Pages/MyBets/MyBets';
 import PlaceBet from './Pages/PlaceBet/PlaceBet';
+import Profile from './Pages/Profile/Profile';
 import UserSessionProvider from './contexts/UserSessionContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -20,7 +21,7 @@ const App = () => {
             <Route path="/login" element={<Login/>} />
 
             {/* TODO: Profile page */}
-            {/* <Route path="/profile" element={<Profile/>} /> */}
+            <Route path="/profile" element={<Profile/>} />
 
             {/* MyBets Page */}
             <Route path="/myBets" element={<MyBets/>} />
