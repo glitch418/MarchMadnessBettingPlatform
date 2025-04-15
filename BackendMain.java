@@ -27,6 +27,7 @@ public class BackendMain {
         server.createContext("/signup", new SignUpHandler());
         server.createContext("/games", new GameHandler());
         server.createContext("/teams", new TeamHandler());
+        server.createContext("/mybets", new BetsHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
@@ -248,4 +249,115 @@ public class BackendMain {
         }
         return result.toString();
     }
+
+    static class BetsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Set CORS headers
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+    
+            // Handle preflight requests
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+    
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+    
+            // Parse the email query parameter robustly
+            String query = exchange.getRequestURI().getQuery();
+            String email = "";
+            if (query != null) {
+                String[] params = query.split("&");
+                for (String param : params) {
+                    String[] keyValue = param.split("=");
+                    if (keyValue.length == 2 && keyValue[0].equals("email")) {
+                        email = keyValue[1];
+                        break;
+                    }
+                }
+            }
+            if (email.isEmpty()) {
+                exchange.sendResponseHeaders(400, -1); // Bad Request if no email found.
+                return;
+            }
+   
+            int userId = getUserIdFromEmail(email);
+            if (userId == -1) {
+                // If no user is found, return an error response.
+                String errorResponse = "{\"error\":\"User not found for email " + email + "\"}";
+                exchange.sendResponseHeaders(404, errorResponse.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(errorResponse.getBytes());
+                os.close();
+                return;
+            }
+    
+            String json = getBetsJson(userId);
+            byte[] responseBytes = json.getBytes();
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(responseBytes);
+            os.close();
+        }
+    }
+    
+    public static String getBetsJson(int userId) {
+        // In a real implementation, you’d first look up the user_id from the email.
+        // For testing, assume a fixed user_id; replace this with your logic:
+        
+        StringBuilder result = new StringBuilder("[");
+        String query = "SELECT * FROM bets WHERE user_id = " + userId;
+        try (Connection dbCxn = DriverManager.getConnection(
+            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = dbCxn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            
+            while (rs.next()) {
+                result.append("{")
+                      .append("\"bet_id\":").append(rs.getInt("bet_id")).append(",")
+                      .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
+                      .append("\"team_id\":").append(rs.getInt("team_id")).append(",")
+                      .append("\"amount\":").append(rs.getBigDecimal("amount")).append(",")
+                      .append("\"payout\":").append(rs.getBigDecimal("payout")).append(",")
+                      .append("\"bet_status\":\"").append(rs.getString("bet_status")).append("\"")
+                      .append("},");
+            }
+            if (result.length() > 1)
+                result.setLength(result.length() - 1); // remove trailing comma
+            result.append("]");
+        } catch (SQLException e) {
+            return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
+        }
+        return result.toString();
+    }
+   
+    /** 
+     * New helper method to look up a user's ID based on their email.
+     * @param email The user's email address.
+     * @return The user_id, or -1 if not found.
+     */
+    private static int getUserIdFromEmail(String email) {
+        String query = "SELECT user_id FROM users WHERE email = ?";
+        try (Connection dbCxn = DriverManager.getConnection(
+            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             PreparedStatement pstmt = dbCxn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving user id for email " + email + ": " + e.getMessage());
+        }
+        return -1; // Indicate that no matching user was found.
+    }
+
+    
 }
