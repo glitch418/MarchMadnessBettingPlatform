@@ -1,14 +1,14 @@
 import React from "react";
 import { useUserSession } from "../../contexts/UserSessionContext";
-import "./MyBets.css";
+import "./Profile.css";
 
-const MyBets = () => {
-  const {isLoggedIn, userEmail} = useUserSession();
+const Profile = () => {
+  const {isLoggedIn, userEmail, balance, login, logout, updateBalance} = useUserSession();
   
   if (!isLoggedIn) {
     return (
     <div>
-      <h1>Login to see your bets</h1>
+      <h1>Login to see your profile</h1>
     </div>)
   }
   
@@ -19,4 +19,4 @@ const MyBets = () => {
   )
 }
   
-export default MyBets;
+export default Profile;

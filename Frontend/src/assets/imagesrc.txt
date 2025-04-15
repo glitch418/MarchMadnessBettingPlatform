@@ -9,6 +9,7 @@ Search Icon: https://www.flaticon.com/free-icon/search_149852?term=search&page=1
 Profile Icon: https://www.flaticon.com/free-icon/user_149071?term=profile&page=1&position=9&origin=tag&related_id=149071 
 Final Four Icon: https://i.turner.ncaa.com/sites/default/files/cssu/mml/2025/bracket/finalfourlogo.svg
 Placeholder Team Icon: https://www.flaticon.com/free-icon/basketball_18846785?term=basketball+logo&page=1&position=24&origin=search&related_id=18846785
+Dollar Sign Icon: https://www.flaticon.com/free-icon/dollar-sign_7500362?term=dollar&page=1&position=23&origin=tag&related_id=7500362
 
 Copied Code 
 https://mherman.org/blog/dockerizing-a-react-app/

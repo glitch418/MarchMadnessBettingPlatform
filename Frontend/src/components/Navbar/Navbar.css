@@ -23,8 +23,8 @@ nav {
     gap: 10vw;
 }
 
-/* Main container */
-.container {
+/* Navigation container */
+.left-section {
     display: flex;
     gap: 2vw;
     flex: 1;
@@ -47,7 +47,7 @@ nav {
 
 /* Align text in the center properly */
 .nav-item p {
-    padding-top: 0.5vh;
+    padding-top: 1vh;
 }
 
 /* Scale icons with viewport */
@@ -82,11 +82,38 @@ nav {
     font-size: 1vw;
 }
 
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
+    padding-right: 2vw;
+}
+
+.balance-item{
+    display: flex;
+    gap: 0.5vw;
+    cursor: pointer;
+    color: white;
+    font-size: 1.25vw;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.balance-item p {
+    padding-top: 1vh;
+}
+
+/* Scale icons with viewport */
+.balance-item img {
+    width: 2.5vw;
+    height: 2.5vw;
+}
+
 /*  To find hexcode of corresponding colors, visit: https://htmlcolorcodes.com/colors/
     Current hexcode used: Orange = #FFAC1C / Blue = #09BDF2
     To convert hexcode to filter, visit: https://codepen.io/sosuke/pen/Pjoqqp
 */
-#home-icon, #bet-icon, #search-icon {
+#home-icon, #bet-icon, #search-icon, #placebet-icon, #balance-icon {
     filter: invert(61%) sepia(84%) saturate(436%) hue-rotate(355deg) brightness(99%) contrast(104%);
     /* filter: invert(69%) sepia(37%) saturate(5288%) hue-rotate(153deg) brightness(97%) contrast(96%); */
 }
