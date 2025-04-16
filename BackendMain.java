@@ -331,35 +331,50 @@ public class BackendMain {
     }
     
     public static String getBetsJson(int userId) {
-        // In a real implementation, you’d first look up the user_id from the email.
-        // For testing, assume a fixed user_id; replace this with your logic:
-        
         StringBuilder result = new StringBuilder("[");
-        String query = "SELECT * FROM bets WHERE user_id = " + userId;
+        String query =
+            "SELECT " +
+            "  b.bet_id, " +
+            "  t1.team_name AS team1_name, " +
+            "  t2.team_name AS team2_name, " +
+            "  t3.team_name AS team_name, " +
+            "  b.amount, " +
+            "  b.payout, " +
+            "  b.bet_status " +
+            "FROM bets b " +
+            "JOIN games g ON b.game_id = g.game_id " +
+            "JOIN teams t1 ON g.team1_id = t1.team_id " +
+            "JOIN teams t2 ON g.team2_id = t2.team_id " +
+            "JOIN teams t3 ON b.team_id   = t3.team_id " +
+            "WHERE b.user_id = " + userId;
+    
         try (Connection dbCxn = DriverManager.getConnection(
-            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
              Statement stmt = dbCxn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
-            
+    
             while (rs.next()) {
                 result.append("{")
                       .append("\"bet_id\":").append(rs.getInt("bet_id")).append(",")
-                      .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
-                      .append("\"team_id\":").append(rs.getInt("team_id")).append(",")
+                      .append("\"team1_name\":\"").append(rs.getString("team1_name")).append("\",")
+                      .append("\"team2_name\":\"").append(rs.getString("team2_name")).append("\",")
+                      .append("\"team_name\":\"").append(rs.getString("team_name")).append("\",")
                       .append("\"amount\":").append(rs.getBigDecimal("amount")).append(",")
                       .append("\"payout\":").append(rs.getBigDecimal("payout")).append(",")
                       .append("\"bet_status\":\"").append(rs.getString("bet_status")).append("\"")
                       .append("},");
             }
-            if (result.length() > 1)
-                result.setLength(result.length() - 1); // remove trailing comma
+            if (result.length() > 1) {
+                result.setLength(result.length() - 1); // drop trailing comma
+            }
             result.append("]");
         } catch (SQLException e) {
             return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
         }
         return result.toString();
     }
-   
+    
+       
     /** 
      * New helper method to look up a user's ID based on their email.
      * @param email The user's email address.

@@ -50,8 +50,8 @@ const MyBets = () => {
           <thead className="table-dark">
             <tr>
               <th>Bet ID</th>
-              <th>Game ID</th>
-              <th>Team ID</th>
+              <th>Matchup</th>
+              <th>Team</th>
               <th>Amount</th>
               <th>Payout</th>
               <th>Status</th>
@@ -61,8 +61,8 @@ const MyBets = () => {
             {bets.map((bet) => (
               <tr key={bet.bet_id}>
                 <td>{bet.bet_id}</td>
-                <td>{bet.game_id}</td>
-                <td>{bet.team_id}</td>
+                <td>{bet.team1_name} vs {bet.team2_name}</td>
+                <td>{bet.team_name}</td>
                 <td>${bet.amount.toFixed(2)}</td>
                 <td>${bet.payout.toFixed(2)}</td>
                 <td
