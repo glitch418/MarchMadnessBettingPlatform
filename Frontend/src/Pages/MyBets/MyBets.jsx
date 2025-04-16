@@ -1,63 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserSession } from "../../contexts/UserSessionContext";
 import "./MyBets.css";
+import Navbar from "../../components/Navbar/Navbar";
 
 const MyBets = () => {
   const { isLoggedIn, userEmail } = useUserSession();
   const [bets, setBets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Fetch the bets for the logged-in user using their email
   useEffect(() => {
-    if (isLoggedIn) {
-      // Adjust the URL and query parameters based on your backend API requirements.
-      fetch(`http://localhost:5001/mybets?email=${encodeURIComponent(userEmail)}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          setBets(data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Error fetching bets:", err);
-          setError(err.message);
-          setLoading(false);
-        });
-    }
+    if (!isLoggedIn) return;
+    setLoading(true);
+    fetch(`http://localhost:5001/mybets?email=${encodeURIComponent(userEmail)}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch bets");
+        return res.json();
+      })
+      .then(data => setBets(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, [isLoggedIn, userEmail]);
 
-  // If the user is not logged in, prompt them to log in.
   if (!isLoggedIn) {
     return (
-      <div>
-        <h1>Login to see your bets</h1>
+      <div className="mybets-container container my-5">
+        <h2>Please log in to view your bets</h2>
       </div>
     );
   }
 
-  // While bets are loading, show a loading message.
-  if (loading) {
-    return <div>Loading your bets...</div>;
-  }
-
-  // Show an error message if the fetch failed.
-  if (error) {
-    return <div>Error loading bets: {error}</div>;
-  }
-
   return (
-    <div className="mybets-container">
-      <h1>Hi, {userEmail}!</h1>
-      {bets.length === 0 ? (
-        <p>You have not placed any bets yet.</p>
+    <div className="mybets-container container my-5">
+      {/* <Navbar/> */}
+      <h2 className="mb-4">My Bets</h2>
+
+      {loading ? (
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading…</span>
+        </div>
+      ) : error ? (
+        <div className="alert alert-danger">{error}</div>
+      ) : bets.length === 0 ? (
+        <div className="alert alert-info">
+          You have not placed any bets yet.
+        </div>
       ) : (
-        <table className="mybets-table">
-          <thead>
+        <table className="mybets-table table table-striped table-hover shadow-sm">
+          <thead className="table-dark">
             <tr>
               <th>Bet ID</th>
               <th>Game ID</th>
@@ -68,14 +58,24 @@ const MyBets = () => {
             </tr>
           </thead>
           <tbody>
-            {bets.map(bet => (
+            {bets.map((bet) => (
               <tr key={bet.bet_id}>
                 <td>{bet.bet_id}</td>
                 <td>{bet.game_id}</td>
                 <td>{bet.team_id}</td>
-                <td>{bet.amount}</td>
-                <td>{bet.payout}</td>
-                <td>{bet.bet_status}</td>
+                <td>${bet.amount.toFixed(2)}</td>
+                <td>${bet.payout.toFixed(2)}</td>
+                <td
+                  className={
+                    bet.bet_status === "won"
+                      ? "text-success"
+                      : bet.bet_status === "lost"
+                      ? "text-danger"
+                      : ""
+                  }
+                >
+                  {bet.bet_status}
+                </td>
               </tr>
             ))}
           </tbody>
