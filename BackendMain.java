@@ -272,87 +272,100 @@ public class BackendMain {
         return result.toString();
     }
 
+    /**
+     * HTTP handler for GET /mybets?email=…  
+     * Reads the “email” query param, looks up the user_id,  
+     * fetches their bets (with team names and matchup), and returns it as JSON.
+     */
     static class BetsHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Set CORS headers
+            // --- CORS & JSON headers ---
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
             exchange.getResponseHeaders().set("Content-Type", "application/json");
-    
-            // Handle preflight requests
+
+            // preflight check
             if ("OPTIONS".equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(204, -1);
                 return;
             }
-    
+            // only allow GET
             if (!"GET".equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(405, -1);
                 return;
             }
-    
-            // Parse the email query parameter robustly
-            String query = exchange.getRequestURI().getQuery();
+
+            // extract email param
             String email = "";
-            if (query != null) {
-                String[] params = query.split("&");
-                for (String param : params) {
-                    String[] keyValue = param.split("=");
-                    if (keyValue.length == 2 && keyValue[0].equals("email")) {
-                        email = keyValue[1];
+            String rawQuery = exchange.getRequestURI().getQuery();
+            if (rawQuery != null) {
+                for (String param : rawQuery.split("&")) {
+                    String[] kv = param.split("=");
+                    if (kv.length == 2 && kv[0].equals("email")) {
+                        email = kv[1];
                         break;
                     }
                 }
             }
             if (email.isEmpty()) {
-                exchange.sendResponseHeaders(400, -1); // Bad Request if no email found.
+                exchange.sendResponseHeaders(400, -1);
                 return;
             }
-   
+
+            // look up user_id
             int userId = getUserIdFromEmail(email);
             if (userId == -1) {
-                // If no user is found, return an error response.
-                String errorResponse = "{\"error\":\"User not found for email " + email + "\"}";
-                exchange.sendResponseHeaders(404, errorResponse.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(errorResponse.getBytes());
-                os.close();
+                String err = "{\"error\":\"User not found for email " + email + "\"}";
+                exchange.sendResponseHeaders(404, err.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(err.getBytes());
+                }
                 return;
             }
-    
+
+            // build and send JSON 
             String json = getBetsJson(userId);
-            byte[] responseBytes = json.getBytes();
-            exchange.sendResponseHeaders(200, responseBytes.length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(responseBytes);
-            os.close();
+            byte[] out = json.getBytes();
+            exchange.sendResponseHeaders(200, out.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(out);
+            }
         }
     }
-    
+
+    /**
+     * Retrieve all bets for a given user_id and return as a JSON array.
+     * Each object includes:
+     *   - bet_id
+     *   - team1_name vs team2_name (the matchup)
+     *   - team_name (the team the user bet on)
+     *   - amount, payout, bet_status
+     *
+     * @param userId the database ID of the user
+     * @return a JSON-formatted String of the user’s bets
+     */
     public static String getBetsJson(int userId) {
         StringBuilder result = new StringBuilder("[");
         String query =
-            "SELECT " +
-            "  b.bet_id, " +
-            "  t1.team_name AS team1_name, " +
-            "  t2.team_name AS team2_name, " +
-            "  t3.team_name AS team_name, " +
-            "  b.amount, " +
-            "  b.payout, " +
-            "  b.bet_status " +
-            "FROM bets b " +
-            "JOIN games g ON b.game_id = g.game_id " +
-            "JOIN teams t1 ON g.team1_id = t1.team_id " +
-            "JOIN teams t2 ON g.team2_id = t2.team_id " +
-            "JOIN teams t3 ON b.team_id   = t3.team_id " +
-            "WHERE b.user_id = " + userId;
-    
-        try (Connection dbCxn = DriverManager.getConnection(
+            "SELECT b.bet_id, " +
+            "       t1.team_name AS team1_name, " +
+            "       t2.team_name AS team2_name, " +
+            "       t3.team_name AS team_name, " +
+            "       b.amount, b.payout, b.bet_status " +
+            "  FROM bets b " +
+            "  JOIN games g ON b.game_id = g.game_id " +
+            "  JOIN teams t1 ON g.team1_id = t1.team_id " +
+            "  JOIN teams t2 ON g.team2_id = t2.team_id " +
+            "  JOIN teams t3 ON b.team_id   = t3.team_id " +
+            " WHERE b.user_id = " + userId;
+
+        try (Connection conn = DriverManager.getConnection(
                  "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
-             Statement stmt = dbCxn.createStatement();
+             Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
-    
+
             while (rs.next()) {
                 result.append("{")
                       .append("\"bet_id\":").append(rs.getInt("bet_id")).append(",")
@@ -364,37 +377,32 @@ public class BackendMain {
                       .append("\"bet_status\":\"").append(rs.getString("bet_status")).append("\"")
                       .append("},");
             }
-            if (result.length() > 1) {
-                result.setLength(result.length() - 1); // drop trailing comma
-            }
+            if (result.length() > 1) result.setLength(result.length() - 1);
             result.append("]");
         } catch (SQLException e) {
             return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
         }
         return result.toString();
     }
-    
-       
+
     /** 
-     * New helper method to look up a user's ID based on their email.
-     * @param email The user's email address.
-     * @return The user_id, or -1 if not found.
+     * Look up a user_id given their email address.
+     * 
+     * @param email the user’s email
+     * @return the corresponding user_id, or –1 if none found
      */
     private static int getUserIdFromEmail(String email) {
-        String query = "SELECT user_id FROM users WHERE email = ?";
-        try (Connection dbCxn = DriverManager.getConnection(
-            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
-             PreparedStatement pstmt = dbCxn.prepareStatement(query)) {
-            pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("user_id");
+        String sql = "SELECT user_id FROM users WHERE email = ?";
+        try (Connection conn = DriverManager.getConnection(
+                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("user_id");
             }
         } catch (SQLException e) {
-            System.out.println("Error retrieving user id for email " + email + ": " + e.getMessage());
+            System.out.println("Error retrieving user_id for email " + email + ": " + e.getMessage());
         }
-        return -1; // Indicate that no matching user was found.
-    }
-
-    
+        return -1;
+    }    
 }
