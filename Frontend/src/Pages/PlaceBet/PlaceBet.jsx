@@ -11,11 +11,10 @@ const PlaceBet = () => {
   const [showToast, setShowToast] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedGameDetails, setSelectedGameDetails] = useState(null);
-  const [betType, setBetType] = useState('spread');
+  const [betType, setBetType] = useState('moneyline');
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const gameList = await fetchGames();
         setGames(Array.isArray(gameList) ? gameList : []);
@@ -35,6 +34,18 @@ const PlaceBet = () => {
     setSelectedTeam('');
   };
 
+  const getSpread = () => {
+    if (!selectedGameDetails || !selectedTeam) return '';
+    const isFavored = selectedTeam === 'team1' ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
+    return isFavored ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread;
+  };
+
+  const getMoneyline = () => {
+    if (!selectedGameDetails || !selectedTeam) return '';
+    const isFavored = selectedTeam === 'team1' ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
+    return isFavored ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline;
+  };
+
   const handlePlaceBet = () => {
     if (!selectedGameId || !selectedTeam || !amount) {
       showToastMessage('Please complete all fields before placing a bet.');
@@ -46,12 +57,12 @@ const PlaceBet = () => {
   const confirmBet = async () => {
     setShowModal(false);
     try {
-      const response = await placeBet(selectedGameId, selectedTeam, betType, parseFloat(amount));
+      const response = await placeBet(selectedGameId, parseFloat(amount));
       showToastMessage('Bet placed successfully!');
       setSelectedGameId('');
       setSelectedTeam('');
       setAmount('');
-      setBetType('spread');
+      setBetType('moneyline');
       console.log(response);
     } catch (error) {
       console.error('Bet placement failed:', error);
@@ -71,6 +82,7 @@ const PlaceBet = () => {
     <div>
       <h2>Place a New Bet</h2>
 
+      {/* Game selection */}
       <select value={selectedGameId} onChange={(e) => handleGameChange(e.target.value)}>
         <option value="">Select a game</option>
         {games.map((game) => (
@@ -80,26 +92,38 @@ const PlaceBet = () => {
         ))}
       </select>
 
+      {/* Display odds info if game is selected */}
       {selectedGameDetails && (
-        <>
-          <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
-            <option value="">Select a team</option>
-            <option value="team1">{selectedGameDetails.team1_name}</option>
-            <option value="team2">{selectedGameDetails.team2_name}</option>
-          </select>
-
-          <p>
-            Spread: {selectedTeam === 'team1' ? selectedGameDetails.team1_odds : selectedTeam === 'team2' ? selectedGameDetails.team2_odds : '-'}<br />
-            Line: TBD {/* Placeholder for future line data */}
-          </p>
-
-          <select value={betType} onChange={(e) => setBetType(e.target.value)}>
-            <option value="spread">Spread</option>
-            <option value="moneyline">Money Line</option>
-          </select>
-        </>
+        <div style={{ marginTop: '10px' }}>
+          <strong>{selectedGameDetails.team1_name}:</strong> Spread {selectedGameDetails.team1_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread} (Moneyline {selectedGameDetails.team1_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline})<br />
+          <strong>{selectedGameDetails.team2_name}:</strong> Spread {selectedGameDetails.team2_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread} (Moneyline {selectedGameDetails.team2_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline})
+        </div>
       )}
 
+      {/* Team selection */}
+      {selectedGameDetails && (
+        <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+          <option value="">Select a team</option>
+          <option value="team1">{selectedGameDetails.team1_name}</option>
+          <option value="team2">{selectedGameDetails.team2_name}</option>
+        </select>
+      )}
+
+      {/* Show betting line for selected team */}
+      {selectedTeam && (
+        <div style={{ marginTop: '10px' }}>
+          <p><strong>Spread:</strong> {getSpread()}</p>
+          <p><strong>Moneyline:</strong> {getMoneyline()}</p>
+        </div>
+      )}
+
+      {/* Bet type */}
+      <select value={betType} onChange={(e) => setBetType(e.target.value)}>
+        <option value="moneyline">Money Line</option>
+        <option value="spread">Spread</option>
+      </select>
+
+      {/* Amount input */}
       <input
         type="number"
         placeholder="Enter bet amount"
@@ -107,8 +131,10 @@ const PlaceBet = () => {
         onChange={(e) => setAmount(e.target.value)}
       />
 
+      {/* Place bet */}
       <button onClick={handlePlaceBet}>Place Bet</button>
 
+      {/* Modal */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -119,6 +145,7 @@ const PlaceBet = () => {
         </div>
       )}
 
+      {/* Toast */}
       {showToast && <div style={styles.toast}>{toastMessage}</div>}
     </div>
   );
