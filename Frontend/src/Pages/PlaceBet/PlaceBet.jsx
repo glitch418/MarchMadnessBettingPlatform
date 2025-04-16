@@ -3,12 +3,15 @@ import { fetchGames, placeBet } from '../../utils/api';
 
 const PlaceBet = () => {
   const [games, setGames] = useState([]);
-  const [selectedGame, setSelectedGame] = useState('');
+  const [selectedGameId, setSelectedGameId] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('');
   const [amount, setAmount] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedGameDetails, setSelectedGameDetails] = useState(null);
+  const [betType, setBetType] = useState('spread');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,9 +28,16 @@ const PlaceBet = () => {
     fetchData();
   }, []);
 
+  const handleGameChange = (gameId) => {
+    setSelectedGameId(gameId);
+    const game = games.find((g) => g.game_id.toString() === gameId);
+    setSelectedGameDetails(game || null);
+    setSelectedTeam('');
+  };
+
   const handlePlaceBet = () => {
-    if (!selectedGame || !amount) {
-      showToastMessage('Please select a game and enter an amount.');
+    if (!selectedGameId || !selectedTeam || !amount) {
+      showToastMessage('Please complete all fields before placing a bet.');
       return;
     }
     setShowModal(true);
@@ -36,10 +46,12 @@ const PlaceBet = () => {
   const confirmBet = async () => {
     setShowModal(false);
     try {
-      const response = await placeBet(selectedGame, parseFloat(amount));
+      const response = await placeBet(selectedGameId, selectedTeam, betType, parseFloat(amount));
       showToastMessage('Bet placed successfully!');
-      setSelectedGame('');
+      setSelectedGameId('');
+      setSelectedTeam('');
       setAmount('');
+      setBetType('spread');
       console.log(response);
     } catch (error) {
       console.error('Bet placement failed:', error);
@@ -59,7 +71,7 @@ const PlaceBet = () => {
     <div>
       <h2>Place a New Bet</h2>
 
-      <select value={selectedGame} onChange={(e) => setSelectedGame(e.target.value)}>
+      <select value={selectedGameId} onChange={(e) => handleGameChange(e.target.value)}>
         <option value="">Select a game</option>
         {games.map((game) => (
           <option key={game.game_id} value={game.game_id}>
@@ -67,6 +79,26 @@ const PlaceBet = () => {
           </option>
         ))}
       </select>
+
+      {selectedGameDetails && (
+        <>
+          <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+            <option value="">Select a team</option>
+            <option value="team1">{selectedGameDetails.team1_name}</option>
+            <option value="team2">{selectedGameDetails.team2_name}</option>
+          </select>
+
+          <p>
+            Spread: {selectedTeam === 'team1' ? selectedGameDetails.team1_odds : selectedTeam === 'team2' ? selectedGameDetails.team2_odds : '-'}<br />
+            Line: TBD {/* Placeholder for future line data */}
+          </p>
+
+          <select value={betType} onChange={(e) => setBetType(e.target.value)}>
+            <option value="spread">Spread</option>
+            <option value="moneyline">Money Line</option>
+          </select>
+        </>
+      )}
 
       <input
         type="number"

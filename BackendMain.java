@@ -145,13 +145,16 @@ public class BackendMain {
         StringBuilder result = new StringBuilder("[");
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
-             Statement stmt = conn.createStatement();
+            Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM teams")) {
 
             while (rs.next()) {
                 result.append("{")
                         .append("\"team_id\":").append(rs.getInt("team_id")).append(",")
-                        .append("\"team_name\":\"").append(rs.getString("team_name")).append("\"")  // updated column name
+                        .append("\"team_name\":\"").append(rs.getString("team_name")).append("\",")
+                        .append("\"abbreviation\":\"").append(rs.getString("abbreviation")).append("\",")
+                        .append("\"region\":\"").append(rs.getString("region")).append("\",")
+                        .append("\"seed\":").append(rs.getInt("seed"))
                         .append("},");
             }
 
@@ -165,6 +168,7 @@ public class BackendMain {
         }
         return result.toString();
     }
+
 
     static class GameHandler implements HttpHandler {
         @Override
@@ -188,34 +192,46 @@ public class BackendMain {
     }
 
     public static String getGamesJson() {
-        StringBuilder result = new StringBuilder("[");
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                "SELECT g.game_id, t1.team_name AS team1_name, t2.team_name AS team2_name " +  // updated column name
-                "FROM games g " +
-                "JOIN teams t1 ON g.team1_id = t1.team_id " +
-                "JOIN teams t2 ON g.team2_id = t2.team_id")) {
+    StringBuilder result = new StringBuilder("[");
+    try (Connection conn = DriverManager.getConnection(
+            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(
+            "SELECT g.game_id, g.team1_id, g.team2_id, " +
+            "t1.team_name AS team1_name, t2.team_name AS team2_name, " +
+            "g.game_time, g.team1_score, g.team2_score, " +
+            "g.team1_odds, g.team2_odds, g.round " +
+            "FROM games g " +
+            "JOIN teams t1 ON g.team1_id = t1.team_id " +
+            "JOIN teams t2 ON g.team2_id = t2.team_id")) {
 
-            while (rs.next()) {
-                result.append("{")
-                        .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
-                        .append("\"team1_name\":\"").append(rs.getString("team1_name")).append("\",")
-                        .append("\"team2_name\":\"").append(rs.getString("team2_name")).append("\"")
-                        .append("},");
-            }
+        while (rs.next()) {
+		result.append("{")
+            .append("\"game_id\":").append(rs.getInt("game_id")).append(",")
+            .append("\"team1_id\":").append(rs.getInt("team1_id")).append(",")
+            .append("\"team2_id\":").append(rs.getInt("team2_id")).append(",")
+            .append("\"team1_name\":\"").append(rs.getString("team1_name")).append("\",")
+            .append("\"team2_name\":\"").append(rs.getString("team2_name")).append("\",")
+            .append("\"game_time\":\"").append(rs.getTimestamp("game_time")).append("\",")
+            .append("\"team1_score\":").append(rs.getObject("team1_score") == null ? "null" : rs.getInt("team1_score")).append(",")
+            .append("\"team2_score\":").append(rs.getObject("team2_score") == null ? "null" : rs.getInt("team2_score")).append(",")
+            .append("\"team1_odds\":").append(rs.getObject("team1_odds") == null ? "null" : rs.getDouble("team1_odds")).append(",")
+            .append("\"team2_odds\":").append(rs.getObject("team2_odds") == null ? "null" : rs.getDouble("team2_odds")).append(",")
+            .append("\"round\":").append(rs.getObject("round") == null ? "null" : rs.getInt("round"))
+            .append("},");
+		}
 
-            if (result.length() > 1) {
-                result.setLength(result.length() - 1); // Remove trailing comma
-            }
-
-            result.append("]");
-        } catch (SQLException e) {
-            return "{\"error\":\"Database error: " + e.getMessage() + "\"}";
+        if (result.length() > 1) {
+            result.setLength(result.length() - 1); // Remove trailing comma
         }
-        return result.toString();
+
+        result.append("]");
+    } catch (SQLException e) {
+        return "{\"error\":\"Database error: " + e.getMessage() + "\"}";
     }
+    return result.toString();
+}
+
 
     public static String executeQuery(String query) {
         StringBuilder result = new StringBuilder();
