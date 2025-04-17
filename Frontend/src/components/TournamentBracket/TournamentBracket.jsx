@@ -2,7 +2,7 @@ import React from "react";
 import Bracket from "../Bracket/Bracket";
 import finalFourLogo from '../../assets/finalfourlogo.svg';
 import './TournamentBracket.css';
-import mockData from "./mockData.json";
+import useTournamentData from "../../components/TournamentBracket/TournamentData";
 import { useState, useEffect } from "react";
 
 /*
@@ -11,6 +11,8 @@ import { useState, useEffect } from "react";
     Returns SVG to display bracket
 */
 const TournamentBracket = (props) => {
+    const { TournamentData, loading, error } = useTournamentData();
+
     // Configuration
     // Width and Height of SVG 
     // (SVG covers half of the regions, left and right only ie. top or bottom is not covered together)
@@ -203,7 +205,7 @@ const TournamentBracket = (props) => {
                 {/* Render brackets with appropriate configurations */}
                 {['South', 'East', 'West', 'Midwest'].map((region) => (
                     ['first', 'second', 'sweet16', 'elite8'].map((round) => (
-                        mockData.regions[region][round].map((matchup, gameIndex) => (
+                        TournamentData.regions[region][round].map((matchup, gameIndex) => (
                             <div
                                 key={`${region}-${round}-${gameIndex}`}
                                 style={{
@@ -362,20 +364,20 @@ const TournamentBracket = (props) => {
 
                 <div style={{ position: "relative", top: 0, display: 'flex', gap: 2 * hSp1}}>
                     <Bracket
-                        team1={mockData.finalFour[0][0]}
-                        team2={mockData.finalFour[0][1]}
+                        team1={TournamentData.finalFour[0][0]}
+                        team2={TournamentData.finalFour[0][1]}
                         width={bracketWidth}
                         height={bracketHeight}
                     />
                     <Bracket
-                        team1={mockData.championship[0][0]}
-                        team2={mockData.championship[0][1]}
+                        team1={TournamentData.championship[0][0]}
+                        team2={TournamentData.championship[0][1]}
                         width={bracketWidth}
                         height={bracketHeight}
                     />
                     <Bracket
-                        team1={mockData.finalFour[1][0]}
-                        team2={mockData.finalFour[1][1]}
+                        team1={TournamentData.finalFour[1][0]}
+                        team2={TournamentData.finalFour[1][1]}
                         width={bracketWidth}
                         height={bracketHeight}
                     />
