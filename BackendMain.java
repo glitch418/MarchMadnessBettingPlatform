@@ -1,3 +1,7 @@
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import database.InsertBets;
+
 // Import necessary classes for HTTP server functionality
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
@@ -14,6 +18,12 @@ import java.sql.*;
 // Import Scanner for reading user input from the command line
 import java.util.Scanner;
 
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+
+
 public class BackendMain {
 
     public static void main(String[] args) throws IOException {
@@ -28,9 +38,61 @@ public class BackendMain {
         server.createContext("/games", new GameHandler());
         server.createContext("/teams", new TeamHandler());
         server.createContext("/mybets", new BetsHandler());
+		server.createContext("/placebet", new PlaceBetHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
+    }
+	
+	
+    static class PlaceBetHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if (!"POST".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+
+            try (InputStream is = exchange.getRequestBody();
+                 InputStreamReader isr = new InputStreamReader(is)) {
+
+                JsonObject json = JsonParser.parseReader(isr).getAsJsonObject();
+                int userId = json.get("user_id").getAsInt();
+                int gameId = json.get("game_id").getAsInt();
+                int teamId = json.get("team_id").getAsInt();
+                double amount = json.get("amount").getAsDouble();
+                String betTypeStr = json.get("bet_type").getAsString();
+                int betType = betTypeStr.equalsIgnoreCase("spread") ? 1 : 2;
+
+                double oldBalance = InsertBets.getUserBalance(userId);
+                double payout = InsertBets.betHandler(gameId, teamId, userId, oldBalance, amount, betType);
+                double newBalance = oldBalance + payout;
+
+                InsertBets.insertBet(userId, gameId, teamId, amount, payout, oldBalance, newBalance);
+
+                String response = "{\"status\":\"Bet placed successfully\"}";
+                exchange.sendResponseHeaders(200, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } catch (Exception e) {
+                String err = "{\"error\":\"Failed to place bet: " + e.getMessage() + "\"}";
+                exchange.sendResponseHeaders(400, err.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(err.getBytes());
+                }
+            }
+        }
     }
 
     static class QueryHandler implements HttpHandler {
