@@ -9,7 +9,7 @@ const Bracket = ({
   onTeamClick = () => {},
   reverse = false,
 }) => {
-  const defaultTeam = { seed: '', name: '', score: null };
+  const defaultTeam = { seed: '', name: '', score: null, abv: '' };
   const t1 = { ...defaultTeam, ...(team1 || {}) };
   const t2 = { ...defaultTeam, ...(team2 || {}) };
 
@@ -19,8 +19,11 @@ const Bracket = ({
   let team2Winner = false;
   
   if (t1.score !== null && t2.score !== null) {
-      team1Winner = t1.score > t2.score;
-      team2Winner = t2.score > t1.score;
+    const score1 = parseInt(t1.score);
+    const score2 = parseInt(t2.score);
+    
+    team1Winner = score1 > score2;
+    team2Winner = score2 > score1;
   }
 
   const renderTeamContent = (team) => {
@@ -47,7 +50,8 @@ const Bracket = ({
           />
         )}
         <div className={`seed${reverse ? '-reverse' : ''}`}>{team.seed}</div>
-        <div className={`name${reverse ? '-reverse' : ''}`}>{team.name}</div>
+        {/* CHANGE team.abv TO team.name IF YOU WANT TO DISPLAY FULL NAMES*/}
+        <div className={`name${reverse ? '-reverse' : ''}`}>{team.abv}</div>  
         <div className={`score${reverse ? '-reverse' : ''}`}>{team.score}</div>
       </div>
     );

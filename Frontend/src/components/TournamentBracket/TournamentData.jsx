@@ -3,8 +3,8 @@ import { useGames } from "../../contexts/GetGamesContext";
 import { useTeams } from "../../contexts/GetTeamsContext";
 
 const createEmptyMatchup = () => ([
-    { seed: '', name: '', score: null },
-    { seed: '', name: '', score: null }
+    { seed: '', name: '', score: null, abv: '' },
+    { seed: '', name: '', score: null, abv: '' }
 ]);
 
 const createRegionStructure = () => ({
@@ -63,13 +63,15 @@ const useTournamentData = () => {
             const team1Data = {
                 seed: team1?.seed ?? '',
                 name: team1?.team_name ?? 'TBD',
-                score: game?.team1_score != null ? game.team1_score.toString() : null
+                score: game?.team1_score != null ? game.team1_score.toString() : null,
+                abv: team1?.abbreviation
             };
 
             const team2Data = {
                 seed: team2?.seed ?? '',
                 name: team2?.team_name ?? 'TBD',
-                score: game?.team2_score != null ? game.team2_score.toString() : null
+                score: game?.team2_score != null ? game.team2_score.toString() : null,
+                abv: team2?.abbreviation
             };
 
             const matchup = [team1Data, team2Data];
