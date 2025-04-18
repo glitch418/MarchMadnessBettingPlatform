@@ -20,9 +20,9 @@ const Bracket = ({
   let team1Winner = false;
   let team2Winner = false;
   
-  if (team1.score !== null && team2.score !== null) {
-      team1Winner = team1.score > team2.score;
-      team2Winner = team2.score > team1.score;
+  if (t1.score !== null && t2.score !== null) {
+      team1Winner = t1.score > t2.score;
+      team2Winner = t2.score > t1.score;
   }
 
   //const imgT1 = `/Team_Logos/${team1.name.replaceAll(" ", "_")}.png`;
