@@ -7,10 +7,6 @@ const useTournamentData = () => {
     const { teams, loading: teamsLoading, error: teamsError } = useTeams();
 
     const tournamentData = useMemo(() => {
-        if (gamesLoading || teamsLoading || !games || !teams) {
-            return null;
-        }
-
         const structure = {
             regions: {
                 South: { firstFour: [], first: [], second: [], sweet16: [], elite8: [] },
@@ -21,6 +17,10 @@ const useTournamentData = () => {
             finalFour: [],
             championship: []
         };
+
+        if (gamesLoading || teamsLoading || !games || !teams) {
+            return structure;
+        }
 
         const roundMapping = {
             0: "firstFour",
