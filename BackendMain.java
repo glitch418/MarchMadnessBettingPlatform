@@ -1,3 +1,7 @@
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import database.InsertBets;
+
 // Import necessary classes for HTTP server functionality
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,6 +17,13 @@ import java.sql.*;
 
 // Import Scanner for reading user input from the command line
 import java.util.Scanner;
+import java.util.Map;
+
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+
 
 public class BackendMain {
 
@@ -25,11 +36,66 @@ public class BackendMain {
         server.createContext("/query", new QueryHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/signup", new SignUpHandler());
+        server.createContext("/balance", new BalanceHandler());
         server.createContext("/games", new GameHandler());
         server.createContext("/teams", new TeamHandler());
+        server.createContext("/mybets", new BetsHandler());
+		server.createContext("/placebet", new PlaceBetHandler());
+        
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
+    }
+	
+	
+    static class PlaceBetHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if (!"POST".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+
+            try (InputStream is = exchange.getRequestBody();
+                 InputStreamReader isr = new InputStreamReader(is)) {
+
+                JsonObject json = JsonParser.parseReader(isr).getAsJsonObject();
+                int userId = json.get("user_id").getAsInt();
+                int gameId = json.get("game_id").getAsInt();
+                int teamId = json.get("team_id").getAsInt();
+                double amount = json.get("amount").getAsDouble();
+                String betTypeStr = json.get("bet_type").getAsString();
+                int betType = betTypeStr.equalsIgnoreCase("spread") ? 1 : 2;
+
+                double oldBalance = InsertBets.getUserBalance(userId);
+                double payout = InsertBets.betHandler(gameId, teamId, userId, oldBalance, amount, betType);
+                double newBalance = oldBalance + payout;
+
+                InsertBets.insertBet(userId, gameId, teamId, amount, payout, oldBalance, newBalance);
+
+                String response = "{\"status\":\"Bet placed successfully\"}";
+                exchange.sendResponseHeaders(200, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } catch (Exception e) {
+                String err = "{\"error\":\"Failed to place bet: " + e.getMessage() + "\"}";
+                exchange.sendResponseHeaders(400, err.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(err.getBytes());
+                }
+            }
+        }
     }
 
     static class QueryHandler implements HttpHandler {
@@ -56,7 +122,61 @@ public class BackendMain {
         }
     }
 
-    static class LoginHandler extends QueryHandler {
+    static class BalanceHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                //String query = exchange.getRequestURI().getQuery();
+                
+                //Map<String, String> m = Parser.parse(query);
+                //String email = m.get("email");
+                //String balance = m.get("balance");
+
+                String rawQuery = exchange.getRequestURI().getQuery();
+                String email = null, balanceStr = null;
+                for (String param : rawQuery.split("&")) {
+                    String[] kv = param.split("=");
+                    if (kv.length == 2) {
+                        if (kv[0].equals("email")) email = kv[1];
+                        if (kv[0].equals("balance")) balanceStr = kv[1];
+                    }
+                }
+
+                if (email == null || balanceStr == null) {
+                    String err = "{\"error\":\"Missing email or balance parameter\"}";
+                    exchange.sendResponseHeaders(400, err.length());
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(err.getBytes());
+                    }
+                    return;
+                }
+
+                String fQuery = "UPDATE users SET balance = " + balanceStr + " WHERE email = '" + email + "'";
+                System.out.println("email: " + email);
+                System.out.println("balance: " + balanceStr);
+                
+                String response = executeQuery(fQuery);
+
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    static class LoginHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
@@ -83,6 +203,8 @@ public class BackendMain {
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
+
+                
             } else {
                 exchange.sendResponseHeaders(405, -1);
             }
@@ -270,4 +392,138 @@ public class BackendMain {
         }
         return result.toString();
     }
+
+    /**
+     * HTTP handler for GET /mybets?email=…  
+     * Reads the “email” query param, looks up the user_id,  
+     * fetches their bets (with team names and matchup), and returns it as JSON.
+     */
+    static class BetsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // --- CORS & JSON headers ---
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            // preflight check
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            // only allow GET
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
+
+            // extract email param
+            String email = "";
+            String rawQuery = exchange.getRequestURI().getQuery();
+            if (rawQuery != null) {
+                for (String param : rawQuery.split("&")) {
+                    String[] kv = param.split("=");
+                    if (kv.length == 2 && kv[0].equals("email")) {
+                        email = kv[1];
+                        break;
+                    }
+                }
+            }
+            if (email.isEmpty()) {
+                exchange.sendResponseHeaders(400, -1);
+                return;
+            }
+
+            // look up user_id
+            int userId = getUserIdFromEmail(email);
+            if (userId == -1) {
+                String err = "{\"error\":\"User not found for email " + email + "\"}";
+                exchange.sendResponseHeaders(404, err.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(err.getBytes());
+                }
+                return;
+            }
+
+            // build and send JSON 
+            String json = getBetsJson(userId);
+            byte[] out = json.getBytes();
+            exchange.sendResponseHeaders(200, out.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(out);
+            }
+        }
+    }
+
+    /**
+     * Retrieve all bets for a given user_id and return as a JSON array.
+     * Each object includes:
+     *   - bet_id
+     *   - team1_name vs team2_name (the matchup)
+     *   - team_name (the team the user bet on)
+     *   - amount, payout, bet_status
+     *
+     * @param userId the database ID of the user
+     * @return a JSON-formatted String of the user’s bets
+     */
+    public static String getBetsJson(int userId) {
+        StringBuilder result = new StringBuilder("[");
+        String query =
+            "SELECT b.bet_id, " +
+            "       t1.team_name AS team1_name, " +
+            "       t2.team_name AS team2_name, " +
+            "       t3.team_name AS team_name, " +
+            "       b.amount, b.payout, b.bet_status " +
+            "  FROM bets b " +
+            "  JOIN games g ON b.game_id = g.game_id " +
+            "  JOIN teams t1 ON g.team1_id = t1.team_id " +
+            "  JOIN teams t2 ON g.team2_id = t2.team_id " +
+            "  JOIN teams t3 ON b.team_id   = t3.team_id " +
+            " WHERE b.user_id = " + userId;
+
+        try (Connection conn = DriverManager.getConnection(
+                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                result.append("{")
+                      .append("\"bet_id\":").append(rs.getInt("bet_id")).append(",")
+                      .append("\"team1_name\":\"").append(rs.getString("team1_name")).append("\",")
+                      .append("\"team2_name\":\"").append(rs.getString("team2_name")).append("\",")
+                      .append("\"team_name\":\"").append(rs.getString("team_name")).append("\",")
+                      .append("\"amount\":").append(rs.getBigDecimal("amount")).append(",")
+                      .append("\"payout\":").append(rs.getBigDecimal("payout")).append(",")
+                      .append("\"bet_status\":\"").append(rs.getString("bet_status")).append("\"")
+                      .append("},");
+            }
+            if (result.length() > 1) result.setLength(result.length() - 1);
+            result.append("]");
+        } catch (SQLException e) {
+            return "{\"error\": \"Database error: " + e.getMessage() + "\"}";
+        }
+        return result.toString();
+    }
+
+    /** 
+     * Look up a user_id given their email address.
+     * 
+     * @param email the user’s email
+     * @return the corresponding user_id, or –1 if none found
+     */
+    private static int getUserIdFromEmail(String email) {
+        String sql = "SELECT user_id FROM users WHERE email = ?";
+        try (Connection conn = DriverManager.getConnection(
+                 "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving user_id for email " + email + ": " + e.getMessage());
+        }
+        return -1;
+    }    
 }

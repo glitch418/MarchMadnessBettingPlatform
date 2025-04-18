@@ -59,7 +59,9 @@ CREATE TABLE bets (
     game_id INT,                            -- The game being bet on.
     team_id INT,                            -- The team the user is betting on.
     amount DECIMAL(10,2) NOT NULL,          -- Amount wagered.
-    payout DECIMAL(10,2),                   -- Potential winnings (NULL until bet is settled).
+    payout DECIMAL(10,2),                   -- Payout after the bet is resolved.
+    old_balance DECIMAL(10,2),              -- User's balance before the bet.
+    new_balance DECIMAL(10,2),              -- User's balance after the bet.
     bet_status ENUM('pending', 'won', 'lost') DEFAULT 'pending',    -- Tracks bet status.
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (game_id) REFERENCES games(game_id),

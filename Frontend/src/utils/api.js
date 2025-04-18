@@ -82,27 +82,37 @@ export const backendSignUp = async (email, password) => {
     }
 };
 
-export const placeBet = async (gameId, teamId, amount) => {
-  try {
-    const userId = 1; // TODO: Replace with dynamic user ID if available
-    const payout = 0; // Placeholder for now
-    const status = 'pending'; // Initial status
-
-    const query = `
-      INSERT INTO bets (user_id, game_id, team_id, amount, payout, bet_status)
-      VALUES (${userId}, ${gameId}, ${teamId}, ${amount}, ${payout}, '${status}')
-    `;
-
-    const response = await fetch(`http://localhost:5001/query?q=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+export const changeBalance = async (email, balance) => {
+    try {
+        const response = await fetch(`http://localhost:5001/balance?email=${encodeURIComponent(email)}&balance=${encodeURIComponent(balance)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return await response.text();
+    } catch (error) {
+        console.error("Error querying backend:", error);
+        return "Error: Unable to fetch data";
     }
-    return await response.text();
-  } catch (error) {
-    console.error("Error placing bet:", error);
-    return "Error: Unable to place bet";
-  }
 };
+
+export const placeBet = async (payload) => {
+    try {
+        const response = await fetch('http://localhost:5001/placebet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error placing bet:", error);
+        return { error: "Unable to place bet" };
+    }
+};;
 
 export const fetchTeams = async () => {
   try {
