@@ -82,6 +82,19 @@ export const backendSignUp = async (email, password) => {
     }
 };
 
+export const changeBalance = async (email, balance) => {
+    try {
+        const response = await fetch(`http://localhost:5001/balance?email=${encodeURIComponent(email)}&balance=${encodeURIComponent(balance)}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return await response.text();
+    } catch (error) {
+        console.error("Error querying backend:", error);
+        return "Error: Unable to fetch data";
+    }
+};
+
 export const placeBet = async (payload) => {
     try {
         const response = await fetch('http://localhost:5001/placebet', {

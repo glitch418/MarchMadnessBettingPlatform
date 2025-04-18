@@ -17,6 +17,7 @@ import java.sql.*;
 
 // Import Scanner for reading user input from the command line
 import java.util.Scanner;
+import java.util.Map;
 
 
 import com.google.gson.JsonObject;
@@ -35,10 +36,12 @@ public class BackendMain {
         server.createContext("/query", new QueryHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/signup", new SignUpHandler());
+        server.createContext("/balance", new BalanceHandler());
         server.createContext("/games", new GameHandler());
         server.createContext("/teams", new TeamHandler());
         server.createContext("/mybets", new BetsHandler());
 		server.createContext("/placebet", new PlaceBetHandler());
+        
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
@@ -119,7 +122,61 @@ public class BackendMain {
         }
     }
 
-    static class LoginHandler extends QueryHandler {
+    static class BalanceHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                //String query = exchange.getRequestURI().getQuery();
+                
+                //Map<String, String> m = Parser.parse(query);
+                //String email = m.get("email");
+                //String balance = m.get("balance");
+
+                String rawQuery = exchange.getRequestURI().getQuery();
+                String email = null, balanceStr = null;
+                for (String param : rawQuery.split("&")) {
+                    String[] kv = param.split("=");
+                    if (kv.length == 2) {
+                        if (kv[0].equals("email")) email = kv[1];
+                        if (kv[0].equals("balance")) balanceStr = kv[1];
+                    }
+                }
+
+                if (email == null || balanceStr == null) {
+                    String err = "{\"error\":\"Missing email or balance parameter\"}";
+                    exchange.sendResponseHeaders(400, err.length());
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(err.getBytes());
+                    }
+                    return;
+                }
+
+                String fQuery = "UPDATE users SET balance = " + balanceStr + " WHERE email = '" + email + "'";
+                System.out.println("email: " + email);
+                System.out.println("balance: " + balanceStr);
+                
+                String response = executeQuery(fQuery);
+
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    static class LoginHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
@@ -146,6 +203,8 @@ public class BackendMain {
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
+
+                
             } else {
                 exchange.sendResponseHeaders(405, -1);
             }
