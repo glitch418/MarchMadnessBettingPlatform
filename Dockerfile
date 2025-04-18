@@ -6,6 +6,7 @@ COPY gson-2.10.1.jar .
 
 # Copy Java source code
 COPY BackendMain.java .
+COPY Parser.java .
 COPY database/ ./database/
 COPY database/InsertBets.java database/
 

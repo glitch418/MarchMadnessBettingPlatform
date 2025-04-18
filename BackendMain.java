@@ -17,6 +17,7 @@ import java.sql.*;
 
 // Import Scanner for reading user input from the command line
 import java.util.Scanner;
+import java.util.Map;
 
 
 import com.google.gson.JsonObject;
@@ -39,6 +40,7 @@ public class BackendMain {
         server.createContext("/teams", new TeamHandler());
         server.createContext("/mybets", new BetsHandler());
 		server.createContext("/placebet", new PlaceBetHandler());
+        server.createContext("/balance", new BalanceHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
@@ -109,6 +111,40 @@ public class BackendMain {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String query = exchange.getRequestURI().getQuery();
                 String response = executeQuery(query.substring(2));
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    static class BalanceHandler extends QueryHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+
+            if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+                
+                Map<String, String> m = Parser.parse(query);
+                String email = m.get("email");
+                String balance = m.get("balance");
+                String fQuery = "UPDATE users SET balance = " + balance + " WHERE email = '" + email + "'";
+                System.out.println("email: " + email);
+                System.out.println("balance: " + balance);
+                
+                String response = executeQuery(fQuery);
+
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
