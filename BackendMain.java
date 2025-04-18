@@ -36,11 +36,12 @@ public class BackendMain {
         server.createContext("/query", new QueryHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/signup", new SignUpHandler());
+        server.createContext("/balance", new BalanceHandler());
         server.createContext("/games", new GameHandler());
         server.createContext("/teams", new TeamHandler());
         server.createContext("/mybets", new BetsHandler());
 		server.createContext("/placebet", new PlaceBetHandler());
-        server.createContext("/balance", new BalanceHandler());
+        
         server.setExecutor(null);
         server.start();
         System.out.println("HTTP server running on port 5001");
