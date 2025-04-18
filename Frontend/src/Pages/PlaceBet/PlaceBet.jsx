@@ -54,21 +54,38 @@ const PlaceBet = () => {
     setShowModal(true);
   };
 
-  const confirmBet = async () => {
-    setShowModal(false);
-    try {
-      const response = await placeBet(selectedGameId, parseFloat(amount));
-      showToastMessage('Bet placed successfully!');
-      setSelectedGameId('');
-      setSelectedTeam('');
-      setAmount('');
-      setBetType('moneyline');
-      console.log(response);
-    } catch (error) {
-      console.error('Bet placement failed:', error);
-      showToastMessage('Bet failed. Please try again.');
-    }
+const confirmBet = async () => {
+  setShowModal(false);
+
+  // Map selected team label to actual team ID
+  const team_id =
+    selectedTeam === 'team1'
+      ? selectedGameDetails.team1_id
+      : selectedGameDetails.team2_id;
+
+  const payload = {
+    user_id: 1, // TODO: Replace with actual user ID when authentication is added
+    game_id: parseInt(selectedGameId),
+    team_id: team_id,
+    amount: parseFloat(amount),
+    bet_type: betType, // "spread" or "moneyline"
   };
+
+  try {
+    const response = await placeBet(payload); // POST to backend
+    console.log("Bet POST response:", response);
+    showToastMessage('Bet placed successfully!');
+
+    // Reset form
+    setSelectedGameId('');
+    setSelectedTeam('');
+    setAmount('');
+    setBetType('moneyline');
+  } catch (error) {
+    console.error('Bet placement failed:', error);
+    showToastMessage('Bet failed. Please try again.');
+  }
+};
 
   const showToastMessage = (message) => {
     setToastMessage(message);
