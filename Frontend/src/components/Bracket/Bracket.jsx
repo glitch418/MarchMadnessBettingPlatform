@@ -1,7 +1,5 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import "./Bracket.css";
-import { useState } from 'react';
-import teamImageMap from '../../utils/teamImageMap';
 
 const Bracket = ({ 
   team1 = null,
@@ -25,22 +23,29 @@ const Bracket = ({
       team2Winner = t2.score > t1.score;
   }
 
-  //const imgT1 = `/Team_Logos/${team1.name.replaceAll(" ", "_")}.png`;
-  //const imgT2 = `/Team_Logos/${team2.name.replaceAll(" ", "_")}.png`;
-
   const renderTeamContent = (team) => {
-    const imgSrc = teamImageMap[team.name];
-    const showImage = !!imgSrc;
+    const [imgSrc, setImgSrc] = useState(null);
+    const [imgError, setImgError] = useState(false);
+  
+    useEffect(() => {
+      if (team.name && team.name.trim() !== '') {
+        setImgSrc(`/Team_Logos/${team.name.replaceAll(" ", "_")}.png`);
+        setImgError(false); // Reset the error if team changes
+      } else {
+        setImgSrc(null);
+      }
+    }, [team.name]);
   
     return (
       <div className={'team-content'}>
-        {showImage && (
-        <img
-          src={imgSrc}
-          alt={`${team.name} logo`}
-          className={`logo${reverse ? '-reverse' : ''}`}
-        />
-      )}
+        {imgSrc && !imgError && (
+          <img
+            src={imgSrc}
+            alt={`${team.name} logo`}
+            className={`logo${reverse ? '-reverse' : ''}`}
+            onError={() => setImgError(true)}
+          />
+        )}
         <div className={`seed${reverse ? '-reverse' : ''}`}>{team.seed}</div>
         <div className={`name${reverse ? '-reverse' : ''}`}>{team.name}</div>
         <div className={`score${reverse ? '-reverse' : ''}`}>{team.score}</div>
