@@ -82,6 +82,19 @@ const Bracket = ({
           stroke={team2Winner ? "orange" : "black"} 
           strokeWidth={team2Winner ? 2 : 1}
         />
+
+        {/* Middle line */}
+        <line
+          x1="0"
+          y1={boxHeight}
+          x2={width}
+          y2={boxHeight}
+          stroke={
+            team1Winner ? "orange" : team2Winner ? "orange" : "black"
+          }
+          strokeWidth={team1Winner || team2Winner ? 2 : 1}
+        />
+      
       </svg>
 
       {/* Team 1 */}
