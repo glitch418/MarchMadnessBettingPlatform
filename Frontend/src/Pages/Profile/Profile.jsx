@@ -31,6 +31,11 @@ const Profile = () => {
     }
   };
   
+  const handleLogout = () => {
+    logout();
+    alert("Logged out successfully!");
+  };
+
   if (!isLoggedIn) {
     return (
     <div>
@@ -64,6 +69,7 @@ const Profile = () => {
       </form>
       <button style={{borderRadius:4}}onClick={handleBalanceUpdate} type="button">Add Money</button>
       <button style={{borderRadius:4}}onClick={handleBalanceWithdraw} type="button">Withdraw Money</button>
+      <button style={{ borderRadius:4, marginTop: '1rem', backgroundColor: 'red' }} onClick={handleLogout} type="button">Logout</button>
     </div>
   )
 }
