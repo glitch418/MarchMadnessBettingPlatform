@@ -82,31 +82,48 @@ const Login = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <input 
-          placeholder="example@email.com" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input 
-          type={showPassword ? "text" : "password"} 
-          placeholder="password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <div>
+      <div style={{justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', alignSelf:'center', position: 'relative'}}>
+      <div 
+        style={{
+          position: 'absolute',
+          width: '50vw',
+          height: '50vh',
+          backgroundColor: '#f0f0f0',
+          zIndex: '-1',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          borderRadius: '10px'
+        }}
+      ></div>
+        <h2 style={{color:'black'}}>Login</h2>
+          <form onSubmit={handleSubmit}>
           <input 
-            type="checkbox" 
-            checked={showPassword} 
-            onChange={() => setShowPassword(!showPassword)} 
+            placeholder="example@email.com" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-          <p>Show Password</p>
-        </div>  
-        <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
-      </form>
+          <input 
+            type={showPassword ? "text" : "password"} 
+            placeholder="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div>
+            <input 
+              type="checkbox" 
+              checked={showPassword} 
+              onChange={() => setShowPassword(!showPassword)} 
+            />
+            <p>Show Password</p>
+          </div>  
+          <button style={{justifyContent:'center', display:'flex', flexDirection:'column', alignSelf:'center', borderRadius:4}}type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+        </form>
 
-      <button onClick={handleCreateAccount} type="button">Create Account</button>
-      <button type="button" onClick={() => alert('Forgot password is not functional yet.')}>Forgot Password?</button>
+        <button style={{borderRadius:4}} onClick={handleCreateAccount} type="button">Create Account</button>
+        <button sytle={{borderRadius:4}} type="button" onClick={() => alert('Forgot password is not functional yet.')}>Forgot Password?</button>
+      </div>
+      
     </div>
   );
 };
