@@ -53,7 +53,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <h2>Basketball Betting Login</h2>
         <input 
-          type="email"
+          type="text"
           placeholder="example@email.com" 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
