@@ -6,7 +6,6 @@ import "./Login.css";
 import { queryBackend, backendLogin, backendSignUp } from '../../utils/api';
 
 const Login = () => {
-  // TODO: forgot password shouldnt take handleSubmit as its onClick method
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,38 +16,22 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting login request");
 
     if (isLoggedIn) {
       alert("You are already logged in.");
       return;
     }
 
-    let returnedEmail = null;
-    let balance = 0;
-
     try {
       const result = await backendLogin(email, password);
-      console.log("Result from backendLogin:", result);
-      console.log("Type of result:", typeof result);
-
       const parts = result.trim().split(/\s+/);
-      console.log("Parsed result array:", parts);
 
-      if (parts.length === 5) {
-        returnedEmail = parts[2];
-        balance = parseFloat(parts[4]);
-      }
-
-      if (returnedEmail === email) {
-        login(email, balance);
-        console.log("Login successful");
+      if (parts.length === 5 && parts[2] === email) {
+        login(email, parseFloat(parts[4]));
         navigate("/");
-      } 
-      else {
+      } else {
         alert("Login failed. Please check your email and password.");
       }
-
     } catch (error) {
       console.error("Login failed:", error);
       alert("Something went wrong during login.");
@@ -65,48 +48,37 @@ const Login = () => {
     }
   };
 
-  const handleQuery = async (query) => {
-    if (!query.trim()) {
-      alert('Please enter a valid query.');
-      return;
-    }
-
-    try {
-      const result = await queryBackend(query);
-      setQueryResult(result);
-    } catch (error) {
-      console.error('Query failed:', error);
-      setQueryResult('Error executing query.');
-    }
-  };
-
   return (
-    <div>
+    <div className="login-page">
       <form onSubmit={handleSubmit}>
+        <h2>Basketball Betting Login</h2>
         <input 
+          type="email"
           placeholder="example@email.com" 
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <input 
           type={showPassword ? "text" : "password"} 
           placeholder="password" 
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
-        <div>
+        <div className="login-show-password">
           <input 
             type="checkbox" 
+            id="showPassword"
             checked={showPassword} 
             onChange={() => setShowPassword(!showPassword)} 
           />
-          <p>Show Password</p>
+          <label htmlFor="showPassword">Show Password</label>
         </div>  
         <button type="submit" disabled={!email.trim() || !password.trim()}>Sign in</button>
+        <button onClick={handleCreateAccount} type="button">Create Account</button>
+        <button type="forgot-button" onClick={() => alert('Forgot password is not functional yet.')}>Forgot Password?</button>
       </form>
-
-      <button onClick={handleCreateAccount} type="button">Create Account</button>
-      <button type="button" onClick={() => alert('Forgot password is not functional yet.')}>Forgot Password?</button>
     </div>
   );
 };
