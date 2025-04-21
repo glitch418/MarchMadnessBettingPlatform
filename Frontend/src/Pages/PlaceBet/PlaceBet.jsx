@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGames, placeBet } from '../../utils/api';
+import { useUserSession } from "../../contexts/UserSessionContext";
 
 const PlaceBet = () => {
   const [games, setGames] = useState([]);
@@ -12,6 +13,7 @@ const PlaceBet = () => {
   const [loading, setLoading] = useState(true);
   const [selectedGameDetails, setSelectedGameDetails] = useState(null);
   const [betType, setBetType] = useState('moneyline');
+  const {userId, updateBalance} = useUserSession();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +66,7 @@ const confirmBet = async () => {
       : selectedGameDetails.team2_id;
 
   const payload = {
-    user_id: 1, // TODO: Replace with actual user ID when authentication is added
+    user_id: userId,
     game_id: parseInt(selectedGameId),
     team_id: team_id,
     amount: parseFloat(amount),

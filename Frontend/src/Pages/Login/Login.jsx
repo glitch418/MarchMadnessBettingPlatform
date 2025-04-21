@@ -23,11 +23,15 @@ const Login = () => {
     }
 
     try {
+      setEmail(email.trim())
       const result = await backendLogin(email, password);
       const parts = result.trim().split(/\s+/);
 
       if (parts.length === 5 && parts[2] === email) {
-        login(email, parseFloat(parts[4]));
+        const userId = parseFloat(parts[0])
+        const balance = parseFloat(parts[4])
+
+        login(email, userId, balance);
         navigate("/");
       } else {
         alert("Login failed. Please check your email and password.");

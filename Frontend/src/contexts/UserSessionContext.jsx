@@ -2,6 +2,7 @@ import { createContext, useState, useContext } from "react";
 
 const UserSessionContext = createContext({
   isLoggedIn: false,
+  userId: null,
   userEmail: null,
   balance: 0.00,
   login: () => {},
@@ -13,6 +14,7 @@ export const UserSessionProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const loggedInStatus = sessionStorage.getItem("isLoggedIn");
     const userEmail = sessionStorage.getItem("userEmail");
+    const userId = sessionStorage.getItem("userId")
     return loggedInStatus === "true" && userEmail !== null && userEmail !== '';
   });
 
@@ -20,26 +22,34 @@ export const UserSessionProvider = ({ children }) => {
     return sessionStorage.getItem("userEmail") || null;
   });
 
+  const [userId, setUserId] = useState(() => {
+    return sessionStorage.getItem("userId") || null;
+  });
+
   const [balance, setBalance] = useState(() => {
     const stored = sessionStorage.getItem("balance");
     return stored ? parseFloat(stored) : 0.00;
   });
 
-  const login = (email, initialBalance = 0) => {
+  const login = (email, id, initialBalance = 0) => {
     setIsLoggedIn(true);
     setUserEmail(email);
+    setUserId(id)
     setBalance(initialBalance);
     sessionStorage.setItem("isLoggedIn", "true");
     sessionStorage.setItem("userEmail", email);
+    sessionStorage.setItem("userId", id.toString());
     sessionStorage.setItem("balance", initialBalance.toString());
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUserEmail(null);
+    setUserId(null);
     setBalance(0);
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userEmail");
+    sessionStorage.removeItem("userId");
     sessionStorage.removeItem("balance");
   };
 
@@ -52,7 +62,7 @@ export const UserSessionProvider = ({ children }) => {
 
   return (
     <UserSessionContext.Provider
-      value={{ isLoggedIn, userEmail, balance, login, logout, updateBalance }}
+      value={{ isLoggedIn, userId, userEmail, balance, login, logout, updateBalance }}
     >
       {children}
     </UserSessionContext.Provider>
