@@ -54,7 +54,7 @@ export const UserSessionProvider = ({ children }) => {
     sessionStorage.removeItem("balance");
   };
 
-  const updateBalance = async (amount) => {
+  const updateBalance = (amount) => {
     const updatedBalance = balance + amount;
     setBalance(updatedBalance);
     sessionStorage.setItem("balance", updatedBalance.toString());
