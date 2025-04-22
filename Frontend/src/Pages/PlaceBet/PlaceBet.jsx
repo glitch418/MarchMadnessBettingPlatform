@@ -77,6 +77,7 @@ const confirmBet = async () => {
     const response = await placeBet(payload); // POST to backend
     console.log("Bet POST response:", response);
     showToastMessage('Bet placed successfully!');
+    updateBalance(-payload.amount)  //Make sure to subtract balance!
 
     // Reset form
     setSelectedGameId('');

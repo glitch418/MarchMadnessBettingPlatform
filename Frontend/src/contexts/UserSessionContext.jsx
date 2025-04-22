@@ -1,4 +1,5 @@
 import { createContext, useState, useContext } from "react";
+import { changeBalance } from "../utils/api";
 
 const UserSessionContext = createContext({
   isLoggedIn: false,
@@ -53,11 +54,10 @@ export const UserSessionProvider = ({ children }) => {
     sessionStorage.removeItem("balance");
   };
 
-  const updateBalance = (newBalance) => {
-    setBalance(newBalance);
-    // add logic to update database here
-    // set session storage item with the value returned from the database
-    sessionStorage.setItem("balance", newBalance.toString());
+  const updateBalance = async (amount) => {
+    const updatedBalance = balance + amount;
+    setBalance(updatedBalance);
+    sessionStorage.setItem("balance", updatedBalance.toString());
   };
 
   return (

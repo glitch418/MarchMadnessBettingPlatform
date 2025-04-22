@@ -10,7 +10,7 @@ const Profile = () => {
   const handleBalanceUpdate = async () => {
     try {
       let a = parseInt(balance) + parseInt(newBalance);
-      updateBalance(a);
+      updateBalance(parseInt(newBalance));
       await changeBalance(userEmail, (a));
       alert("Balance Updated");
     } catch (error) {
@@ -22,7 +22,7 @@ const Profile = () => {
   const handleBalanceWithdraw = async () => {
     try {
       let a = parseInt(balance) - parseInt(newBalance);
-      updateBalance(a);
+      updateBalance(-parseInt(newBalance));  // - sign because amount needs to be subtracted
       await changeBalance(userEmail, (a));
       alert("Balance Updated");
     } catch (error) {
