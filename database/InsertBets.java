@@ -96,43 +96,78 @@ public class InsertBets {
         return payout;
     }
 
-public static void insertBet(int user_id, int game_id, int team_id, double amount, double payout, double old_balance, double new_balance) {
-    String insertQuery = "INSERT INTO bets (user_id, game_id, team_id, amount, payout, old_balance, new_balance) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    String updateBalanceQuery = "UPDATE users SET balance = ? WHERE user_id = ?";
+    /**
+     * Inserts a pending bet (payout zero) and updates the user’s balance immediately.
+     * Then returns the new bet_id for later resolution.
+     * @param user_id     the ID of the user placing the bet
+     * @param game_id     the game being wagered on
+     * @param team_id     the team the user is betting on
+     * @param amount      the amount wagered
+     * @param payout      the (potential) payout; zero for pending
+     * @param old_balance the user’s balance before placing the bet
+     * @param new_balance the user’s balance after placing the bet (old_balance minus amount)
+     * @return the generated bet_id, or -1 on failure
+     */
+    public static int insertBet(int user_id,
+                                int game_id,
+                                int team_id,
+                                double amount,
+                                double payout,
+                                double old_balance,
+                                double new_balance) {
+        String insertSql =
+            "INSERT INTO bets (user_id, game_id, team_id, amount, payout, old_balance, new_balance) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String updateSql =
+            "UPDATE users SET balance = ? WHERE user_id = ?";
 
-    System.out.println(">>> insertBet called with:");
-    System.out.println("user_id: " + user_id);
-    System.out.println("game_id: " + game_id);
-    System.out.println("team_id: " + team_id);
-    System.out.println("amount: " + amount);
-    System.out.println("payout: " + payout);
-    System.out.println("old_balance: " + old_balance);
-    System.out.println("new_balance: " + new_balance);
+        int betId = -1;
 
-    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-         PreparedStatement pstmt = conn.prepareStatement(insertQuery);
-         PreparedStatement updateStmt = conn.prepareStatement(updateBalanceQuery)) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            conn.setAutoCommit(false);  // start transaction
 
-        // Log connection success
-        System.out.println(">>> Connected to database successfully.");
+            try (PreparedStatement psInsert = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement psUpdate = conn.prepareStatement(updateSql)) {
 
-        pstmt.setInt(1, user_id);
-        pstmt.setInt(2, game_id);
-        pstmt.setInt(3, team_id);
-        pstmt.setDouble(4, amount);
-        pstmt.setDouble(5, payout);
-        pstmt.setDouble(6, old_balance);
-        pstmt.setDouble(7, new_balance);
-        int inserted = pstmt.executeUpdate();
-        System.out.println(">>> Inserted rows into bets: " + inserted);
+                // bind insert parameters
+                psInsert.setInt(1, user_id);
+                psInsert.setInt(2, game_id);
+                psInsert.setInt(3, team_id);
+                psInsert.setDouble(4, amount);
+                psInsert.setDouble(5, payout);
+                psInsert.setDouble(6, old_balance);
+                psInsert.setDouble(7, new_balance);
 
-        updateStmt.setDouble(1, new_balance);
-        updateStmt.setInt(2, user_id);
-        int updated = updateStmt.executeUpdate();
-        System.out.println(">>> Updated user balance rows: " + updated);
+                int rows = psInsert.executeUpdate();
+                System.out.println(">>> insertBet: inserted rows=" + rows);
 
-    } catch (SQLException e) {
-        System.out.println("Database Insert Error (insertBet): " + e.getMessage());
+                // grab the generated bet_id
+                try (ResultSet rs = psInsert.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        betId = rs.getInt(1);
+                        System.out.println(">>> insertBet: new bet_id=" + betId);
+                    }
+                }
+
+                // update the user’s balance
+                psUpdate.setDouble(1, new_balance);
+                psUpdate.setInt(2, user_id);
+                int updated = psUpdate.executeUpdate();
+                System.out.println(">>> insertBet: updated balance rows=" + updated);
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println(">>> insertBet: transaction rolled back due to " + e.getMessage());
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database Insert Error (insertBet): " + e.getMessage());
+        }
+
+        return betId;
     }
-}
 }

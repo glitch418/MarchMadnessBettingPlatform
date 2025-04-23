@@ -4,31 +4,39 @@ import "./MyBets.css";
 import Navbar from "../../components/Navbar/Navbar";
 
 const MyBets = () => {
-  // Pull login state and user email from session context
-  const { isLoggedIn, userEmail } = useUserSession();
+  const { isLoggedIn, userEmail, refreshBalance } = useUserSession();
 
-  // Local state: fetched bets, loading flag, and any error message
-  const [bets, setBets] = useState([]);
+  const [bets, setBets]       = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError]     = useState("");
 
-  // Effect: when user logs in (or email changes), fetch their bets
-  useEffect(() => {
-    if (!isLoggedIn) return;            // do nothing if not logged in
-    setLoading(true);                   // show spinner
-
-    // Hit backend endpoint to get bets for this user
+  // helper to load bets + keep balance in sync
+  const fetchBets = () => {
+    setLoading(true);
     fetch(`http://localhost:5001/mybets?email=${encodeURIComponent(userEmail)}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch bets");
-        return res.json();               // parse JSON if successful
+        return res.json();
       })
-      .then(data => setBets(data))       // put bets into state
+      .then(data => setBets(data))
       .catch(err => setError(err.message))
-      .finally(() => setLoading(false)); // hide spinner
-  }, [isLoggedIn, userEmail]);
+      .finally(() => {
+        setLoading(false);
+        refreshBalance();
+      });
+  };
 
-  // If not logged in, prompt user to log in
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    // initial load
+    fetchBets();
+
+    // then poll every 30 seconds
+    const intervalId = setInterval(fetchBets, 30_000);
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn, userEmail, refreshBalance]);
+
   if (!isLoggedIn) {
     return (
       <div className="mybets-container container my-5">
@@ -37,27 +45,22 @@ const MyBets = () => {
     );
   }
 
-  // Main render: display loading spinner, error, empty state, or table
   return (
     <div className="mybets-container container my-5">
-      {/* <Navbar/>  */}
+      {/* <Navbar /> */}
       <h2 className="mb-4">My Bets</h2>
 
       {loading ? (
-        // Loading state
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading…</span>
         </div>
       ) : error ? (
-        // Error state
         <div className="alert alert-danger">{error}</div>
       ) : bets.length === 0 ? (
-        // No bets placed yet
         <div className="alert alert-info">
           You have not placed any bets yet.
         </div>
       ) : (
-        // Bets table
         <table className="mybets-table table table-striped table-hover shadow-sm">
           <thead className="table-dark">
             <tr>
@@ -70,22 +73,18 @@ const MyBets = () => {
             </tr>
           </thead>
           <tbody>
-            {bets.map((bet) => (
+            {bets.map(bet => (
               <tr key={bet.bet_id}>
-                <td>{bet.bet_id}</td>                           {/* show bet identifier */}
-                <td>{bet.team1_name} vs {bet.team2_name}</td>   {/* show matchup */}
-                <td>{bet.team_name}</td>                        {/* show chosen team */}
-                <td>${bet.amount.toFixed(2)}</td>               {/* format currency */}
+                <td>{bet.bet_id}</td>
+                <td>{bet.team1_name} vs {bet.team2_name}</td>
+                <td>{bet.team_name}</td>
+                <td>${bet.amount.toFixed(2)}</td>
                 <td>${bet.payout.toFixed(2)}</td>
-                <td
-                  className={
-                    bet.bet_status === "won"
-                      ? "text-success"
-                      : bet.bet_status === "lost"
-                      ? "text-danger"
-                      : ""
-                  }
-                >
+                <td className={
+                    bet.bet_status === "won"  ? "text-success"
+                  : bet.bet_status === "lost" ? "text-danger"
+                  : ""
+                }>
                   {bet.bet_status}
                 </td>
               </tr>

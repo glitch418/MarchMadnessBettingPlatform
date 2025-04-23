@@ -9,8 +9,10 @@ const Profile = () => {
 
   const handleBalanceUpdate = async () => {
     try {
+      console.log('📥 [Profile] before add, balance =', balance)
       let a = parseInt(balance) + parseInt(newBalance);
       updateBalance(a);
+      console.log('📥 [Profile] after addBalance, balance =', a)
       await changeBalance(userEmail, (a));
       alert("Balance Updated");
     } catch (error) {
@@ -21,8 +23,10 @@ const Profile = () => {
 
   const handleBalanceWithdraw = async () => {
     try {
+      console.log('📤 [Profile] before withdraw, balance =', balance)
       let a = parseInt(balance) - parseInt(newBalance);
       updateBalance(a);
+      console.log('📤 [Profile] after withdraw, balance =', a)
       await changeBalance(userEmail, (a));
       alert("Balance Updated");
     } catch (error) {

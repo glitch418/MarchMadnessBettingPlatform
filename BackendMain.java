@@ -18,6 +18,9 @@ import java.sql.*;
 // Import Scanner for reading user input from the command line
 import java.util.Scanner;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 import com.google.gson.JsonObject;
@@ -26,6 +29,9 @@ import com.google.gson.JsonParser;
 
 
 public class BackendMain {
+    private static final ScheduledExecutorService scheduler =
+        Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final double HOUSE_EDGE = 0.05;  
 
     public static void main(String[] args) throws IOException {
         startHttpServer();
@@ -55,39 +61,61 @@ public class BackendMain {
             exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, OPTIONS");
             exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
             exchange.getResponseHeaders().set("Content-Type", "application/json");
-
+    
             if ("OPTIONS".equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(204, -1);
                 return;
             }
-
+    
             if (!"POST".equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(405, -1);
                 return;
             }
-
+    
             try (InputStream is = exchange.getRequestBody();
                  InputStreamReader isr = new InputStreamReader(is)) {
-
+    
                 JsonObject json = JsonParser.parseReader(isr).getAsJsonObject();
-                int userId = json.get("user_id").getAsInt();
-                int gameId = json.get("game_id").getAsInt();
-                int teamId = json.get("team_id").getAsInt();
-                double amount = json.get("amount").getAsDouble();
+                int userId      = json.get("user_id").getAsInt();
+                int gameId      = json.get("game_id").getAsInt();
+                int teamId      = json.get("team_id").getAsInt();
+                double amount   = json.get("amount").getAsDouble();
                 String betTypeStr = json.get("bet_type").getAsString();
-                int betType = betTypeStr.equalsIgnoreCase("spread") ? 1 : 2;
-
+                int betType     = betTypeStr.equalsIgnoreCase("spread") ? 1 : 2;
+    
+                // 1) fetch current balance
                 double oldBalance = InsertBets.getUserBalance(userId);
-                double payout = InsertBets.betHandler(gameId, teamId, userId, oldBalance, amount, betType);
-                double newBalance = oldBalance + payout;
-
-                InsertBets.insertBet(userId, gameId, teamId, amount, payout, oldBalance, newBalance);
-
-                String response = "{\"status\":\"Bet placed successfully\"}";
+    
+                // 2) immediately deduct the stake (pending bet)
+                double payout      = 0.0;
+                double newBalance  = oldBalance - amount;
+    
+                // 3) record the pending bet and update user’s balance
+                int betId = InsertBets.insertBet(
+                    userId,
+                    gameId,
+                    teamId,
+                    amount,
+                    payout,
+                    oldBalance,
+                    newBalance
+                );
+    
+                // → schedule automatic resolution in 30 seconds
+                scheduler.schedule(() -> {
+                    try {
+                        resolveBet(betId, userId);
+                    } catch (SQLException e) {
+                        System.err.println("Failed to auto-resolve bet " + betId + ": " + e.getMessage());
+                    }
+                }, 30, TimeUnit.SECONDS);
+    
+                String response = "{\"status\":\"Bet placed successfully\",\"bet_id\":" + betId + "}";
                 exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
+    
             } catch (Exception e) {
                 String err = "{\"error\":\"Failed to place bet: " + e.getMessage() + "\"}";
                 exchange.sendResponseHeaders(400, err.length());
@@ -97,6 +125,7 @@ public class BackendMain {
             }
         }
     }
+        
 
     static class QueryHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
@@ -135,42 +164,77 @@ public class BackendMain {
             }
 
             if ("GET".equals(exchange.getRequestMethod())) {
-                //String query = exchange.getRequestURI().getQuery();
-                
-                //Map<String, String> m = Parser.parse(query);
-                //String email = m.get("email");
-                //String balance = m.get("balance");
-
                 String rawQuery = exchange.getRequestURI().getQuery();
                 String email = null, balanceStr = null;
                 for (String param : rawQuery.split("&")) {
                     String[] kv = param.split("=");
                     if (kv.length == 2) {
-                        if (kv[0].equals("email")) email = kv[1];
-                        if (kv[0].equals("balance")) balanceStr = kv[1];
+                        if (kv[0].equals("email"))    email      = kv[1];
+                        if (kv[0].equals("balance"))  balanceStr = kv[1];
                     }
                 }
-
-                if (email == null || balanceStr == null) {
-                    String err = "{\"error\":\"Missing email or balance parameter\"}";
+            
+                if (email == null) {
+                    String err = "{\"error\":\"Missing email parameter\"}";
                     exchange.sendResponseHeaders(400, err.length());
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(err.getBytes());
                     }
                     return;
                 }
-
-                String fQuery = "UPDATE users SET balance = " + balanceStr + " WHERE email = '" + email + "'";
-                System.out.println("email: " + email);
-                System.out.println("balance: " + balanceStr);
-                
-                String response = executeQuery(fQuery);
-
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } else {
+            
+                // **READ** mode: no `balance` query → return current balance
+                if (balanceStr == null) {
+                    try (Connection conn = DriverManager.getConnection(
+                        "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+                         PreparedStatement ps = conn.prepareStatement(
+                             "SELECT balance FROM users WHERE email = ?")) {
+                        ps.setString(1, email);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            double liveBal = rs.next() ? rs.getDouble("balance") : 0.0;
+                            String json = "{\"balance\":" + liveBal + "}";
+                            byte[] out = json.getBytes();
+                            exchange.getResponseHeaders().set("Content-Type","application/json");
+                            exchange.sendResponseHeaders(200, out.length);
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(out);
+                            }
+                        }
+                    } catch (SQLException e) {
+                        String err = "{\"error\":\"Database error: " + e.getMessage() + "\"}";
+                        exchange.sendResponseHeaders(500, err.length());
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(err.getBytes());
+                        }
+                    }
+                    return;
+                }
+            
+                // **UPDATE** mode: both email & balance → update
+                double newBal = Double.parseDouble(balanceStr);
+                String updateSql = "UPDATE users SET balance = ? WHERE email = ?";
+                try (Connection conn = DriverManager.getConnection(
+                    "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword");
+                     PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                    ps.setDouble(1, newBal);
+                    ps.setString(2, email);
+                    int rows = ps.executeUpdate();
+                    String resp = "{\"updated\":" + rows + "}";
+                    byte[] out = resp.getBytes();
+                    exchange.getResponseHeaders().set("Content-Type","application/json");
+                    exchange.sendResponseHeaders(200, out.length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(out);
+                    }
+                } catch (SQLException e) {
+                    String err = "{\"error\":\"Database error: " + e.getMessage() + "\"}";
+                    exchange.sendResponseHeaders(500, err.length());
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(err.getBytes());
+                    }
+                }
+            }
+             else {
                 exchange.sendResponseHeaders(405, -1);
             }
         }
@@ -525,5 +589,75 @@ public class BackendMain {
             System.out.println("Error retrieving user_id for email " + email + ": " + e.getMessage());
         }
         return -1;
-    }    
+    }   
+
+     
+    /**
+     * Runs 30s after bet placement: fetches live user balance, computes win/loss,
+     * updates bet_status, payout, new_balance and writes the user's new balance.
+     */
+    private static void resolveBet(int betId, int userId) throws SQLException {
+        try (Connection conn = DriverManager.getConnection(
+            "jdbc:mysql://db:3306/betting_platform", "root", "rootpassword")) {
+            conn.setAutoCommit(false);
+
+            // 1) Lock & read bet
+            PreparedStatement psBet = conn.prepareStatement(
+                "SELECT game_id, team_id, amount FROM bets WHERE bet_id=? FOR UPDATE");
+            psBet.setInt(1, betId);
+            ResultSet brs = psBet.executeQuery();
+            if (!brs.next()) { conn.rollback(); return; }
+            int gameId = brs.getInt("game_id");
+            int teamId = brs.getInt("team_id");
+            double stake = brs.getDouble("amount");
+
+            // 2) Lock & read current user balance
+            PreparedStatement psUser = conn.prepareStatement(
+                "SELECT balance FROM users WHERE user_id=? FOR UPDATE");
+            psUser.setInt(1, userId);
+            ResultSet urs = psUser.executeQuery();
+            if (!urs.next()) { conn.rollback(); return; }
+            double currentBalance = urs.getDouble("balance");
+
+            // 3) Read game outcome
+            PreparedStatement psGame = conn.prepareStatement(
+                "SELECT team1_id, team2_id, team1_score, team2_score FROM games WHERE game_id=?");
+            psGame.setInt(1, gameId);
+            ResultSet grs = psGame.executeQuery();
+            if (!grs.next()) { conn.rollback(); return; }
+            int t1 = grs.getInt("team1_id"), s1 = grs.getInt("team1_score");
+            int t2 = grs.getInt("team2_id"), s2 = grs.getInt("team2_score");
+
+            // 4) Win/loss logic
+            boolean won = (teamId == t1 && s1 > s2) || (teamId == t2 && s2 > s1);
+            double payout = won ? stake * 2 : 0;
+            if (won) {
+                double rawProfit = payout - stake;
+                double profitAfter = rawProfit * (1.0 - HOUSE_EDGE);
+                payout = stake + profitAfter;
+            }
+
+            double finalBalance = currentBalance + payout;
+
+            // 5) Update bets row
+            PreparedStatement psUpdBet = conn.prepareStatement(
+                "UPDATE bets SET bet_status=?, payout=?, new_balance=? WHERE bet_id=?");
+            psUpdBet.setString(1, won ? "won" : "lost");
+            psUpdBet.setDouble(2, payout);
+            psUpdBet.setDouble(3, finalBalance);
+            psUpdBet.setInt(4, betId);
+            psUpdBet.executeUpdate();
+
+            // 6) Update users table
+            PreparedStatement psUpdUser = conn.prepareStatement(
+                "UPDATE users SET balance=? WHERE user_id=?");
+            psUpdUser.setDouble(1, finalBalance);
+            psUpdUser.setInt(2, userId);
+            psUpdUser.executeUpdate();
+
+            conn.commit();
+        }
+    }
+
+ 
 }

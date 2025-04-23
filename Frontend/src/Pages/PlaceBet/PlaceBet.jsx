@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGames, placeBet } from '../../utils/api';
-import { useUserSession } from "../../contexts/UserSessionContext";
+import { useUserSession } from '../../contexts/UserSessionContext';
 
 const PlaceBet = () => {
   const [games, setGames] = useState([]);
@@ -13,7 +13,9 @@ const PlaceBet = () => {
   const [loading, setLoading] = useState(true);
   const [selectedGameDetails, setSelectedGameDetails] = useState(null);
   const [betType, setBetType] = useState('moneyline');
-  const {userId, updateBalance} = useUserSession();
+
+  // pull balance + updateBalance from context
+  const { userId, balance, updateBalance } = useUserSession();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,14 +40,24 @@ const PlaceBet = () => {
 
   const getSpread = () => {
     if (!selectedGameDetails || !selectedTeam) return '';
-    const isFavored = selectedTeam === 'team1' ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
-    return isFavored ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread;
+    const isFavored =
+      selectedTeam === 'team1'
+        ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id
+        : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
+    return isFavored
+      ? selectedGameDetails.favored_spread
+      : selectedGameDetails.dog_spread;
   };
 
   const getMoneyline = () => {
     if (!selectedGameDetails || !selectedTeam) return '';
-    const isFavored = selectedTeam === 'team1' ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
-    return isFavored ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline;
+    const isFavored =
+      selectedTeam === 'team1'
+        ? selectedGameDetails.team_favored_id === selectedGameDetails.team1_id
+        : selectedGameDetails.team_favored_id === selectedGameDetails.team2_id;
+    return isFavored
+      ? selectedGameDetails.favored_moneyline
+      : selectedGameDetails.dog_moneyline;
   };
 
   const handlePlaceBet = () => {
@@ -56,38 +68,42 @@ const PlaceBet = () => {
     setShowModal(true);
   };
 
-const confirmBet = async () => {
-  setShowModal(false);
+  const confirmBet = async () => {
+    setShowModal(false);
 
-  // Map selected team label to actual team ID
-  const team_id =
-    selectedTeam === 'team1'
-      ? selectedGameDetails.team1_id
-      : selectedGameDetails.team2_id;
+    const team_id =
+      selectedTeam === 'team1'
+        ? selectedGameDetails.team1_id
+        : selectedGameDetails.team2_id;
 
-  const payload = {
-    user_id: userId,
-    game_id: parseInt(selectedGameId),
-    team_id: team_id,
-    amount: parseFloat(amount),
-    bet_type: betType, // "spread" or "moneyline"
+    const payload = {
+      user_id: userId,
+      game_id: parseInt(selectedGameId),
+      team_id: team_id,
+      amount: parseFloat(amount),
+      bet_type: betType,
+    };
+
+    try {
+      await placeBet(payload);
+      showToastMessage('Bet placed successfully!');
+
+      // log and immediately deduct the stake from UI balance
+      console.log('📉 [PlaceBet] stake:', amount, 'old balance:', balance);
+      const newBal = balance - parseFloat(amount);
+      updateBalance(newBal);
+      console.log('📉 [PlaceBet] new balance (frontend) =', newBal);
+
+      // reset form
+      setSelectedGameId('');
+      setSelectedTeam('');
+      setAmount('');
+      setBetType('moneyline');
+    } catch (error) {
+      console.error('Bet placement failed:', error);
+      showToastMessage('Bet failed. Please try again.');
+    }
   };
-
-  try {
-    const response = await placeBet(payload); // POST to backend
-    console.log("Bet POST response:", response);
-    showToastMessage('Bet placed successfully!');
-
-    // Reset form
-    setSelectedGameId('');
-    setSelectedTeam('');
-    setAmount('');
-    setBetType('moneyline');
-  } catch (error) {
-    console.error('Bet placement failed:', error);
-    showToastMessage('Bet failed. Please try again.');
-  }
-};
 
   const showToastMessage = (message) => {
     setToastMessage(message);
@@ -101,8 +117,10 @@ const confirmBet = async () => {
     <div>
       <h2>Place a New Bet</h2>
 
-      {/* Game selection */}
-      <select value={selectedGameId} onChange={(e) => handleGameChange(e.target.value)}>
+      <select
+        value={selectedGameId}
+        onChange={(e) => handleGameChange(e.target.value)}
+      >
         <option value="">Select a game</option>
         {games.map((game) => (
           <option key={game.game_id} value={game.game_id}>
@@ -111,38 +129,32 @@ const confirmBet = async () => {
         ))}
       </select>
 
-      {/* Display odds info if game is selected */}
       {selectedGameDetails && (
         <div style={{ marginTop: '10px' }}>
-          <strong>{selectedGameDetails.team1_name}:</strong> Spread {selectedGameDetails.team1_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread} (Moneyline {selectedGameDetails.team1_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline})<br />
-          <strong>{selectedGameDetails.team2_name}:</strong> Spread {selectedGameDetails.team2_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_spread : selectedGameDetails.dog_spread} (Moneyline {selectedGameDetails.team2_id === selectedGameDetails.team_favored_id ? selectedGameDetails.favored_moneyline : selectedGameDetails.dog_moneyline})
+          <strong>{selectedGameDetails.team1_name}:</strong> Spread{' '}
+          {getSpread()} (Moneyline {getMoneyline()})
+          <br />
+          <strong>{selectedGameDetails.team2_name}:</strong> Spread{' '}
+          {getSpread()} (Moneyline {getMoneyline()})
         </div>
       )}
 
-      {/* Team selection */}
       {selectedGameDetails && (
-        <select value={selectedTeam} onChange={(e) => setSelectedTeam(e.target.value)}>
+        <select
+          value={selectedTeam}
+          onChange={(e) => setSelectedTeam(e.target.value)}
+        >
           <option value="">Select a team</option>
           <option value="team1">{selectedGameDetails.team1_name}</option>
           <option value="team2">{selectedGameDetails.team2_name}</option>
         </select>
       )}
 
-      {/* Show betting line for selected team */}
-      {selectedTeam && (
-        <div style={{ marginTop: '10px' }}>
-          <p><strong>Spread:</strong> {getSpread()}</p>
-          <p><strong>Moneyline:</strong> {getMoneyline()}</p>
-        </div>
-      )}
-
-      {/* Bet type */}
       <select value={betType} onChange={(e) => setBetType(e.target.value)}>
         <option value="moneyline">Money Line</option>
         <option value="spread">Spread</option>
       </select>
 
-      {/* Amount input */}
       <input
         type="number"
         placeholder="Enter bet amount"
@@ -150,10 +162,8 @@ const confirmBet = async () => {
         onChange={(e) => setAmount(e.target.value)}
       />
 
-      {/* Place bet */}
       <button onClick={handlePlaceBet}>Place Bet</button>
 
-      {/* Modal */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -164,7 +174,6 @@ const confirmBet = async () => {
         </div>
       )}
 
-      {/* Toast */}
       {showToast && <div style={styles.toast}>{toastMessage}</div>}
     </div>
   );
