@@ -112,7 +112,7 @@ export const placeBet = async (payload) => {
         console.error("Error placing bet:", error);
         return { error: "Unable to place bet" };
     }
-};;
+};
 
 export const fetchTeams = async () => {
   try {
@@ -125,3 +125,17 @@ export const fetchTeams = async () => {
     return [];
   }
 };
+
+/**
+ * Fetch the current balance for the given email.
+ * @param {string} email
+ * @returns {Promise<number|null>} current balance or null on error
+ */
+export const fetchBalance = async (email) => {
+    const res = await fetch(`http://localhost:5001/balance?email=${encodeURIComponent(email)}`);
+    if (!res.ok) throw new Error(`Failed to fetch balance: ${res.status}`);
+    const { balance } = await res.json();
+    return parseFloat(balance);
+  };
+  
+  
