@@ -19,7 +19,7 @@ const PlaceBet = () => {
   const { userId, isLoggedIn, balance, updateBalance } = useUserSession();
 
   if (!isLoggedIn){
-    return <h2>Please log in to view your bets</h2>;
+    return <h2>Please log in to place a bet</h2>;
   }
 
   useEffect(() => {
