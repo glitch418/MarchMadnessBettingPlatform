@@ -1,0 +1,126 @@
+/* PlaceBet.css - pB prefix to avoid conflicts */
+.pB-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pB-container {
+    max-width: 650px;
+    margin: auto;
+    padding: 10vh;
+    background-color: #e8e7e7;
+    border-radius: 7px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pB-title {
+    color: #000000;
+    margin-bottom: 20px;
+    font-size: 4vh;
+    text-align: center;
+}
+
+.pB-select, .pB-input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: rgb(255, 255, 255);
+}
+
+.pB-select:focus, .pB-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.pB-button {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    background-color: #fb8b2f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.pB-button:hover {
+    background-color: #2980b9;
+}
+
+.pB-game-details {
+    background-color: white;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+}
+
+.pB-team-info {
+    margin-bottom: 10px;
+}
+
+.pB-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.pB-modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.pB-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pB-modal-buttons .pB-button {
+    width: auto;
+    padding: 10px 25px;
+}
+
+.pB-modal-buttons .pB-button-cancel {
+    background-color: #e74c3c;
+}
+
+.pB-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #333;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 4px;
+    z-index: 1001;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.pB-form-group {
+    margin-bottom: 15px;
+}
+
+.pB-loading {
+    text-align: center;
+    font-size: 5vh;
+    color: #7f8c8d;
+}

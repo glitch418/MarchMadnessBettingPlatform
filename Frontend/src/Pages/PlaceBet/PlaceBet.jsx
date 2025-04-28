@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchGames, placeBet } from '../../utils/api';
 import { useUserSession } from '../../contexts/UserSessionContext';
+import "./PlaceBet.css"
 
 const PlaceBet = () => {
   const [games, setGames] = useState([]);
@@ -15,7 +16,11 @@ const PlaceBet = () => {
   const [betType, setBetType] = useState('moneyline');
 
   // pull balance + updateBalance from context
-  const { userId, balance, updateBalance } = useUserSession();
+  const { userId, isLoggedIn, balance, updateBalance } = useUserSession();
+
+  if (!isLoggedIn){
+    return <h2>Please log in to view your bets</h2>;
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,103 +116,104 @@ const PlaceBet = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className='pB-loading'>Loading...</div>;
 
   return (
-    <div>
-      <h2>Place a New Bet</h2>
+    <div className='pB-page'>
+      <div className="pB-container">
+        <h2 className="pB-title">Place a New Bet</h2>
 
-      <select
-        value={selectedGameId}
-        onChange={(e) => handleGameChange(e.target.value)}
-      >
-        <option value="">Select a game</option>
-        {games.map((game) => (
-          <option key={game.game_id} value={game.game_id}>
-            {game.team1_name} vs {game.team2_name}
-          </option>
-        ))}
-      </select>
-
-      {selectedGameDetails && (
-        <div style={{ marginTop: '10px' }}>
-          <strong>{selectedGameDetails.team1_name}:</strong> Spread{' '}
-          {getSpread()} (Moneyline {getMoneyline()})
-          <br />
-          <strong>{selectedGameDetails.team2_name}:</strong> Spread{' '}
-          {getSpread()} (Moneyline {getMoneyline()})
+        <div className="pB-form-group">
+          <select
+            className="pB-select"
+            value={selectedGameId}
+            onChange={(e) => handleGameChange(e.target.value)}
+          >
+            <option value="">Select a game</option>
+            {games.map((game) => (
+              <option key={game.game_id} value={game.game_id}>
+                {game.team1_name} vs {game.team2_name}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {selectedGameDetails && (
-        <select
-          value={selectedTeam}
-          onChange={(e) => setSelectedTeam(e.target.value)}
-        >
-          <option value="">Select a team</option>
-          <option value="team1">{selectedGameDetails.team1_name}</option>
-          <option value="team2">{selectedGameDetails.team2_name}</option>
-        </select>
-      )}
-
-      <select value={betType} onChange={(e) => setBetType(e.target.value)}>
-        <option value="moneyline">Money Line</option>
-        <option value="spread">Spread</option>
-      </select>
-
-      <input
-        type="number"
-        placeholder="Enter bet amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
-
-      <button onClick={handlePlaceBet}>Place Bet</button>
-
-      {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            <p>Are you sure you want to place this bet?</p>
-            <button onClick={confirmBet}>Yes</button>
-            <button onClick={() => setShowModal(false)}>Cancel</button>
+        {selectedGameDetails && (
+          <div className="pB-game-details">
+            <div className="pB-team-info">
+              <strong>{selectedGameDetails.team1_name}:</strong> Spread{' '}
+              {selectedGameDetails.team_favored_id === selectedGameDetails.team1_id
+                ? selectedGameDetails.favored_spread
+                : selectedGameDetails.dog_spread} (Moneyline{' '}
+              {selectedGameDetails.team_favored_id === selectedGameDetails.team1_id
+                ? selectedGameDetails.favored_moneyline
+                : selectedGameDetails.dog_moneyline})
+            </div>
+            <div className="pB-team-info">
+              <strong>{selectedGameDetails.team2_name}:</strong> Spread{' '}
+              {selectedGameDetails.team_favored_id === selectedGameDetails.team2_id
+                ? selectedGameDetails.favored_spread
+                : selectedGameDetails.dog_spread} (Moneyline{' '}
+              {selectedGameDetails.team_favored_id === selectedGameDetails.team2_id
+                ? selectedGameDetails.favored_moneyline
+                : selectedGameDetails.dog_moneyline})
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showToast && <div style={styles.toast}>{toastMessage}</div>}
+        {selectedGameDetails && (
+          <div className="pB-form-group">
+            <select
+              className="pB-select"
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+            >
+              <option value="">Select a team</option>
+              <option value="team1">{selectedGameDetails.team1_name}</option>
+              <option value="team2">{selectedGameDetails.team2_name}</option>
+            </select>
+          </div>
+        )}
+
+        <div className="pB-form-group">
+          <select 
+            className="pB-select"
+            value={betType} 
+            onChange={(e) => setBetType(e.target.value)}
+          >
+            <option value="moneyline">Money Line</option>
+            <option value="spread">Spread</option>
+          </select>
+        </div>
+
+        <div className="pB-form-group">
+          <input
+            className="pB-input"
+            type="number"
+            placeholder="Enter bet amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+
+        <button className="pB-button" onClick={handlePlaceBet}>Place Bet</button>
+
+        {showModal && (
+          <div className="pB-modal-overlay">
+            <div className="pB-modal-content">
+              <p>Are you sure you want to place this bet?</p>
+              <div className="pB-modal-buttons">
+                <button className="pB-button" onClick={confirmBet}>Yes</button>
+                <button className="pB-button pB-button-cancel" onClick={() => setShowModal(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showToast && <div className="pB-toast">{toastMessage}</div>}
+      </div>
     </div>
   );
-};
-
-const styles = {
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center',
-  },
-  toast: {
-    position: 'fixed',
-    bottom: '30px',
-    right: '30px',
-    backgroundColor: '#333',
-    color: '#fff',
-    padding: '12px 20px',
-    borderRadius: '4px',
-    zIndex: 1001,
-  },
 };
 
 export default PlaceBet;
